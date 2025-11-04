@@ -15,5 +15,7 @@ namespace Entidades
         [NotMapped]
         public IFormFile? ImagenFile { get; set; }
         public int DevID { get; set; }
+		public string? Descripcion { get; set; }
+		public string?  Categoria { get; set; }
 	}
 }
