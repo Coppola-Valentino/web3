@@ -1,36 +1,32 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const { sequelize } = require('../db.js');
 
-class Appeals extends Model {}
+class Publisher extends Model {}
 
-Appeals.init({
-    IDAppeal: {
+Publisher.init({
+    IDPublisher: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true
     },
-    BanID: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    UserID: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    Contenido: {
+    Nombre: {
       type: DataTypes.STRING,
       allowNull: true
     },
-    Estado:{
+    Banner: {
       type: DataTypes.STRING,
+      allowNull: true
+    },
+    FundadorID: {
+      type: DataTypes.INTEGER,
       allowNull: true
     }
 }, {
 
 sequelize,
-modelName: 'Appeals',
-tableName: 'appeals',
+modelName: 'Publisher',
+tableName: 'publisher',
 timestamps: false
 });
 
-module.exports = Appeals;
+module.exports = Publisher;
