@@ -1,3 +1,19 @@
 include bar.pug
 +bar()
 block content
+        div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+         h1 #{Usuario.Nombre}
+         p #{Usuario.Avatar}
+         if Usuario.Team != null
+            p Miembro del Team: #{Team.Nombre}
+         p Juegos: 
+          for game in juegos
+           div(class="Container-fluid text-center justify-content-center")      
+            div(class="col btn btn-link" style="Padding-bottom: 40px;")
+                p #{game.Nombre}
+                br
+                p #{game.Imagen}
+        div(class="Container-fluid text-center justify-content-center")      
+         div(class="col btn btn-link" style="Padding-bottom: 40px;")
+          a.btn.btn-warning(href=`/`) Volver
+          br

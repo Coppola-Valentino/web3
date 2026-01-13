@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const User = require('./models/Usuario');
+const User = require('./Entidades/Usuario');
 
 const auther = async (req, res, next) => {
     try {

@@ -1,3 +1,15 @@
 include bar.pug
 +bar()
 block content
+        div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+         h1 Apelacion de: #{User.Nombre}
+         p Razon del baneo: #{Ban.Motivo}
+         p Baneado hasta: #{Ban.Duracion}
+         p el Usuario cree que deberia ser apelado porque: #{Appeal.Contenido}
+         p Estado de la apelacion: #{appeal.Estado}
+         if appeal.Estado == "Aceptado" || appeal.Estado == "Rechazado"
+            p Manejado por: #{Admin.Nombre}
+        div(class="Container-fluid text-center justify-content-center")      
+         div(class="col btn btn-link" style="Padding-bottom: 40px;")
+          a.btn.btn-warning(href=`/`) Volver
+          br

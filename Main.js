@@ -14,7 +14,7 @@ app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'pugs'));
+app.set('views', path.join(__dirname, 'Vistas'));
 
 app.use(session({
   resave: false,
@@ -131,7 +131,7 @@ router.post('/CrearJuego',reqAuther, async (req, res) => {
   }
 });
 
-router.get('/CrearBan',reqAuther, async (req, res) => {
+router.get('/CrearBan/:id',reqAuther, async (req, res) => {
   try{
     res.render('CrearBan');
   } catch (err) {
@@ -140,7 +140,7 @@ router.get('/CrearBan',reqAuther, async (req, res) => {
   }
 });
 
-router.post('/CrearBan',reqAuther, async (req, res) => {
+router.post('/CrearBan/:id',reqAuther, async (req, res) => {
   try{
     //no se
     res.redirect('/Home');

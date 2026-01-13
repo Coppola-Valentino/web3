@@ -1,3 +1,25 @@
-//lista de baneos del juego include bar.pug
+//lista de baneos del juego 
+include bar.pug
 +bar()
 block content
+div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+    h1 Lista de Baneos de #{Juego.Nombre}
+    table
+     thead
+      tr
+       th Usuario
+       th Razon
+       th Hasta
+       th Acciones
+        tbody
+         each baneo in baneos
+          tr
+           td= baneo.usuario
+           td= baneo.razon
+           td= baneo.fechaBaneo
+           td
+            a.btn.btn-warning(href=`/ElimBan/${baneo.id}`) Deshacer
+div(class="Container-fluid text-center justify-content-center")      
+ div(class="col btn btn-link" style="Padding-bottom: 40px;")
+  a.btn.btn-warning(href=`/`) Volver
+  br

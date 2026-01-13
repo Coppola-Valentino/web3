@@ -22,7 +22,7 @@ BanList.init({
       allowNull: true
     },
     Duracion: {
-      type: DataTypes.DateOnly,
+      type: DataTypes.DATEONLY,
       allowNull: true
     }
 }, {

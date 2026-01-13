@@ -1,4 +1,17 @@
 include bar.pug
 +bar()
 block content
-//fundar grupo
+div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+         h1 Añadir Dev Team
+         form(action=`/CrearTeam` method="POST" id="formi" style="display: flex; flex-direction: column; gap: 1px;" )
+           label(for="Nombre") Nombre:
+           input(type="text" name="Nombre" id="Nombre" required)
+           br
+           label(for="Banner") añadir un Banner:
+           input(type="text" name="Banner" id="Banner" required) 
+           br
+           input(type="hidden" name="Fundador" id="Fundador" value=currentUser.IDUser)
+           button(class="btn btn-primary" type="submit") Guardar
+           br
+           a.btn.btn-warning(href="/") Cancelar
+           br
