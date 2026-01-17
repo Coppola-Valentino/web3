@@ -6,6 +6,19 @@ const app = express();
 const router = express.Router();
 const { Sequelize, DataTypes } = require('sequelize');
 const { getUser, logout, auther, reqAuther} = require('./authent')
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, 'Imagenes'));
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ storage: storage });
 
 const { sequelize } = require('./db');
 
@@ -47,11 +60,34 @@ const Updates = require('./Entidades/Updates');
 //rutas
 
 router.get('/', async (req, res) => {
-    res.render('Home'); 
+    try {
+      const juegos = await Juego.findAll();
+      res.render('Home', { juegos });
+    } catch (err) {
+      console.error(err.message);
+      res.render('Home', { juegos: [] });
+    }
 });
 
 router.get('/Home', async (req, res) => {
-    res.render('Home'); 
+    try {
+      const juegos = await Juego.findAll();
+      res.render('Home', { juegos });
+    } catch (err) {
+      console.error(err.message);
+      res.render('Home', { juegos: [] });
+    } 
+});
+
+router.get('/VerBiblioteca', async (req, res) => {
+    try {
+      const lic = await Licencia.findAll({ where: { IDUser: req.user.IDUser }});
+      const juegos = await Juego.findAll({ where: { IDJuego: lic.map(l => l.IDJuego) }});
+      res.render('VerBiblioteca', { juegos });
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
 });
 
 router.get('/Login', async (req, res) => {
@@ -83,9 +119,15 @@ router.get('/CrearUsuario', async (req, res) => {
   }
 });
 
-router.post('/CrearUsuario', async (req, res) => {
+router.post('/CrearUsuario', upload.single('Avatar'), async (req, res) => {
   try{
-    //crea usuario
+    await Usuario.create({
+      Nombre: req.body.Nombre,
+      Pass: req.body.Pass,
+      Avatar: req.file ? req.file.filename : null,
+      Team: null,
+      Admin: false
+    });
     res.redirect('/Home');
   } catch (err) {
    console.error(err.message); 
@@ -236,7 +278,11 @@ router.get('/Mensajeria/:id',reqAuther, async (req, res) => {
 
 router.get('/VerAppeal/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`VerAppeal/${req.params.id}`);
+    const appeal = await Appeals.findByPk(req.params.id);
+    const ban = await BanList.findOne({ where: { IDBan: appeal.BanID }});
+    const admin = await Usuario.findOne({ where: {UserID: appeal.IDUser }});
+    const user = await Usuario.findOne({where: {UserID: ban.IDUser}});
+    res.render(`VerAppeal`, {appeal, ban, admin, user});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -245,7 +291,9 @@ router.get('/VerAppeal/:id',reqAuther, async (req, res) => {
 
 router.get('/VerBans/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`VerBans/${req.params.id}`);
+    const licencias = await Licencia.findAll({ where: {JuegoID: req.params.id}});
+    const baneos = await BanList.findAll({ where: { IDLicencia: licencias.map(l => l.IDLicencia) }});
+    res.render(`VerBans`, {baneos});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -254,7 +302,8 @@ router.get('/VerBans/:id',reqAuther, async (req, res) => {
 
 router.get('/VerJuego/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`VerJuego/${req.params.id}`);
+    const juego = await Juego.findByPk(req.params.id);
+    res.render(`VerJuego`, {juego});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -263,7 +312,8 @@ router.get('/VerJuego/:id',reqAuther, async (req, res) => {
 
 router.get('/VerLicencias/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`VerLicencias/${req.params.id}`);
+    const licencias = await Licencia.findAll({ where: { IDJuego: req.params.id }});
+    res.render(`VerLicencias`, {licencias});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -272,7 +322,8 @@ router.get('/VerLicencias/:id',reqAuther, async (req, res) => {
 
 router.get('/VerTeam/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`VerTeam/${req.params.id}`);
+    const team = await DevTeam.findByPk(req.params.id);
+    res.render(`VerTeam`, {team});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -281,7 +332,8 @@ router.get('/VerTeam/:id',reqAuther, async (req, res) => {
 
 router.get('/VerUsuario/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`VerUsuario/${req.params.id}`);
+    const user = await Usuario.findByPk(req.params.id);
+    res.render(`VerUsuario`, {user});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');

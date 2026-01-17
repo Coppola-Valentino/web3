@@ -11,7 +11,7 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
            input(type="text" name="Banner" id="Banner" required value=Publisher.Banner) 
            br
            if Publisher.Fundador == currentUser.IDUser 
-            label(for="Fundador") Cambiar Administrador:
+            label(for="Fundador") Cambiar Admininistrador:
             select(name="Fundador" id="Fundador")
               each user in Users
                 if user.IDUser != Publisher.Fundador

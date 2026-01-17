@@ -3,17 +3,47 @@ include bar.pug
 block content
 div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
          h1 Registrarse
-         form(action=`/CrearUsuario` method="POST" id="formi" style="display: flex; flex-direction: column; gap: 1px;" )
+         form(action=`/CrearUsuario` method="POST" id="formi" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1px;" )
            label(for="Nombre") Nombre:
            input(type="text" name="Nombre" id="Nombre" required)
            br
            label(for="Pass") Contraseña:
-           input(type="double" name="Pass" id="Pass" required)
+           input(type="password" name="Pass" id="Pass" required) 
+           button(type="button" id="buton" style="max-width: 150px; max-height: 45px; margin-top: 5px;" onclick="PassToggle()") Mostrar/Ocultar
            br
            label(for="Avatar") Avatar:
-           input(type="text" name="Avatar" id="Avatar" required)
+           input(type="file" name="Avatar" id="Avatar" accept="image/*")
            br
            button(class="btn btn-primary" type="submit") Guardar
            br
            a.btn.btn-warning(href="/") Cancelar
            br
+           script.
+                function PassToggle() {
+                  const pass = document.getElementById('Pass');
+                  if (pass.type === "password") {
+                    pass.type = "text";
+                  } else {
+                    pass.type = "password";
+                }}
+                rol.addEventListener('change', updateEspecialidadState);
+                document.getElementById('formi').addEventListener('submit', function(event) {
+                  const userImp = document.getElementById('Usuario');
+                  if (userImp.value.length > 20 || userImp.value.length < 6) {
+                    alert('El usuario debe tener entre 6 y 20 caracteres');
+                    event.preventDefault();
+                  }
+                  const passImp = document.getElementById('Pass');
+                  if (passImp.value.length > 30) {
+                    alert('La contraseña no puede tener más de 30 digitos.');
+                    event.preventDefault();
+                  }
+                  if (passImp.value.length < 6) {
+                    alert('La contraseña no puede tener menos de 6 digitos.');
+                    event.preventDefault();
+                  }
+                  if (passImp.value.search(/[0-9]/) == -1 || passImp.value.search(/[a-z]/i) == -1 || passImp.value.search(/[A-Z]/i) == -1 || passImp.value.search(/[^a-zA-Z0-9]/) == -1) {
+                    alert('La contraseña debe contener almenos un numero, una Mayuscula, una minuscula y un caracter especial.');
+                    event.preventDefault();
+                  }
+                 });

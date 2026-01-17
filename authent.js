@@ -3,19 +3,19 @@ const User = require('./Entidades/Usuario');
 
 const auther = async (req, res, next) => {
     try {
-        const {Pass, Usuario} = req.body;
-        if (!Pass || !Usuario) {
+        const {Pass, Nombre} = req.body;
+        if (!Pass || !Nombre) {
             console.error('Faltan datos');
             return res.render('Login');
         }
 
-        const user = await User.findOne({where: {Usuario}});
+        const user = await User.findOne({where: {Nombre}});
         if (!user) {
             console.error('Usuario no encontrado');
             return res.render('Login');
         }
 
-        console.log('User found:', user.Usuario);
+        console.log('User found:', user.Nombre);
         console.log('user.Pass from DB:', user.Pass);
         console.log('Pass from form:', Pass);
 
@@ -28,8 +28,8 @@ const auther = async (req, res, next) => {
         }
 
         req.session.IDUser = user.IDUser;
-        req.session.Usuario = user.Usuario;
-        req.session.Rol = user.Rol;
+        req.session.Nombre = user.Nombre;
+        req.session.Admin = user.Admin;
 
         next();
     } catch (err) {

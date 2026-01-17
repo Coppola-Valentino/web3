@@ -1,3 +1,51 @@
 include bar.pug
 +bar()
 block content
+        div(style="max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; padding-top: 95px;")
+         h1 Iniciar Sesion
+         form(action=`/Login` method="POST" id="formi" style="display: flex; flex-direction: column; gap: 1px;" )
+           label(for="Nombre") Nombre de Usuario: 
+            input(type="text" name="Nombre" id="Nombre" required autocomplete="off")
+           br
+           label(for="Pass") Contraseña: 
+            input(type="password" name="Pass" id="Pass" required autocomplete="off")
+            button(type="button" id="buton" style="margin-left: 10px;" onclick="PassToggle()") Mostrar/Ocultar
+           br
+           button(class="btn btn-primary" type="submit") Iniciar Sesion
+           br
+           a.btn.btn-warning(href="/Home") Cancelar
+           script.
+                //const USERS = !{JSON.stringify(Nusuarios)};
+                 function PassToggle() {
+                  const pass = document.getElementById('Pass');
+                  if (pass.type === "password") {
+                    pass.type = "text";
+                  } else {
+                    pass.type = "password";
+                  }}
+                document.getElementById('formi').addEventListener('submit', function(event) {
+                  const userImp = document.getElementById('Usuario');
+                  if (userImp.value.length > 20) {
+                    alert('El usuario no puede tener más de 20 caracteres.');
+                    event.preventDefault();
+                  }
+                  const passImp = document.getElementById('Pass');
+                  if (passImp.value.length > 30) {
+                    alert('La contraseña no puede tener más de 30 digitos.');
+                    event.preventDefault();
+                  }
+                  if (passImp.value.length < 6) {
+                    alert('La contraseña no puede tener menos de 6 digitos.');
+                    event.preventDefault();
+                  }
+                  /*if (userImp.value && !USERS.includes((UserImp.value))) {
+                   alert('El usuario no está registrado.');
+                   event.preventDefault();
+                  }*/
+                  /*for (us in tUSERS) {
+                   if (userImp.value === us.Usuario && passImp.value !== us.Pass) {
+                    alert('Contraseña o usuario incorrecto');
+                    event.preventDefault();
+                   }
+                  }*/ // aun tengo que hacer algo parecido de alguna puta manera (esta vez si)
+                 });

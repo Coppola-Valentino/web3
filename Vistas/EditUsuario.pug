@@ -13,9 +13,9 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
            label(for="Avatar") Avatar:
            input(type="text" name="Avatar" id="Avatar" required value=Usuario.Avatar)
            br
-           if currentUser.Adm == 1 || currentUser.Adm == true 
-            label(for="Adm") Habilitar como Administrador:
-            input(type="checkbox" name="Adm" id="Adm" required value=Usuario.Adm) 
+           if currentUser.Admin == 1 || currentUser.Admin == true 
+            label(for="Admin") Habilitar como Admininistrador:
+            input(type="checkbox" name="Admin" id="Admin" required value=Usuario.Admin) 
             br
            button(class="btn btn-primary" type="submit") Guardar
            br

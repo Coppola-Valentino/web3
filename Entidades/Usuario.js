@@ -1,7 +1,14 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const { sequelize } = require('../db.js');
+const bcrypt = require('bcrypt');
 
-class Usuario extends Model {}
+class Usuario extends Model {
+
+ async validar(Pass) {
+  return await bcrypt.compare(Pass, this.Pass);
+ }
+ 
+};
 
 Usuario.init({
     IDUser: {
@@ -25,7 +32,7 @@ Usuario.init({
       type: DataTypes.INTEGER,
       allowNull: true
     },
-    Adm: {
+    Admin: {
       type: DataTypes.BOOLEAN,
       allowNull: true
     }
@@ -34,7 +41,21 @@ Usuario.init({
 sequelize,
 modelName: 'Usuario',
 tableName: 'usuario',
-timestamps: false
+timestamps: false,
+hooks: {
+  beforeCreate: async (User) => {
+    if (User.Pass) {
+      const sal = await bcrypt.genSalt(10);
+      User.Pass = await bcrypt.hash(User.Pass, sal);
+    }
+  },
+  beforeUpdate: async (User) => {
+    if (User.changed('Pass')) {
+      const sal = await bcrypt.genSalt(10);
+      User.Pass = await bcrypt.hash(User.Pass, sal);
+    }
+  }
+}
 });
 
 module.exports = Usuario;
