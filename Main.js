@@ -48,9 +48,11 @@ app.use(getUser);
     await sequelize.sync();
 
 const Usuario = require('./Entidades/Usuario');
+const Tarjeta = require('./Entidades/Tarjeta');
 const Juego = require('./Entidades/Juego');
 const Licencia = require('./Entidades/Licencia');
 const DevTeam = require('./Entidades/DevTeam');
+const Publisher = require('./Entidades/Publisher');
 const Reseña = require('./Entidades/Reseña');
 const BanList = require('./Entidades/BanList');
 const Appeals = require('./Entidades/Appeals');
@@ -81,7 +83,7 @@ router.get('/Home', async (req, res) => {
 
 router.get('/VerBiblioteca', async (req, res) => {
     try {
-      const lic = await Licencia.findAll({ where: { IDUser: req.user.IDUser }});
+      const lic = await Licencia.findAll({ where: { UserID: req.session.IDUser }});
       const juegos = await Juego.findAll({ where: { IDJuego: lic.map(l => l.IDJuego) }});
       res.render('VerBiblioteca', { juegos });
     } catch (err) {
@@ -124,6 +126,7 @@ router.post('/CrearUsuario', upload.single('Avatar'), async (req, res) => {
     await Usuario.create({
       Nombre: req.body.Nombre,
       Pass: req.body.Pass,
+      Email: req.body.Email,
       Avatar: req.file ? req.file.filename : null,
       Team: null,
       Admin: false
@@ -144,10 +147,15 @@ router.get('/CrearTeam', reqAuther, async (req, res) => {
   }
 });
 
-router.post('/CrearTeam', reqAuther, async (req, res) => {
+router.post('/CrearTeam', upload.single('Banner'), reqAuther, async (req, res) => {
   try{
-    //crea team
-    res.redirect(`/VerTeam/${req.body.IDTeam}`);
+    const team = await DevTeam.create({
+      Nombre: req.body.Nombre,
+      Banner: req.file ? req.file.filename : null,
+      FundadorID: req.session.IDUser
+    });
+    await Usuario.update({ Team: team.IDTeam }, { where: { IDUser: req.session.IDUser }});
+    res.redirect(`/VerTeam/${team.IDTeam}`);
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -163,10 +171,16 @@ router.get('/CrearJuego',reqAuther, async (req, res) => {
   }
 });
 
-router.post('/CrearJuego',reqAuther, async (req, res) => {
+router.post('/CrearJuego', upload.single('Imagen'), reqAuther, async (req, res) => {
   try{
-    //crear el juego
-    res.redirect(`/VerJuego/${req.body.IDJuego}`);
+    const juego = await Juego.create({
+      Nombre: req.body.Nombre,
+      Precio: req.body.Precio,
+      Imagen: req.file ? req.file.filename : null,
+      DevID: req.session.Team,
+      Descripcion: req.body.Descripcion
+    });
+    res.redirect(`/VerJuego/${juego.IDJuego}`);
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -182,9 +196,14 @@ router.get('/CrearBan/:id',reqAuther, async (req, res) => {
   }
 });
 
-router.post('/CrearBan/:id',reqAuther, async (req, res) => {
+router.post('/CrearBan/:id/:idd',reqAuther, async (req, res) => {
   try{
-    //no se
+    await BanList.create({
+      Motivo: req.body.Nombre,
+      Duracion: req.body.Duracion,
+      IDUser: req.params.idd,
+      IDLicencia: req.params.id
+    });
     res.redirect('/Home');
   } catch (err) {
    console.error(err.message); 
@@ -201,10 +220,15 @@ router.get('/CrearAppeal',reqAuther, async (req, res) => {
   }
 });
 
-router.post('/CrearAppeal',reqAuther, async (req, res) => {
+router.post('/CrearAppeal/:id',reqAuther, async (req, res) => {
   try{
-    //cosa
-    res.render('CrearAppeal');
+    await Appeals.create({
+      BanID: req.params.id,
+      UserID: null,
+      Contenido: req.body.Contenido,
+      Estado: 'Pendiente'
+    });
+    res.redirect('/Home');
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -220,9 +244,15 @@ router.get('/EditJuego/:id',reqAuther, async (req, res) => {
   }
 });
 
-router.post('/EditJuego/:id',reqAuther, async (req, res) => {
+router.post('/EditJuego/:id', upload.single('Imagen'), reqAuther, async (req, res) => {
   try{
-    //post
+   await Juego.update({
+      Nombre: req.body.Nombre,
+      Precio: req.body.Precio,
+      Imagen: req.file ? req.file.filename : null,
+      DevID: req.session.Team,
+      Descripcion: req.body.Descripcion
+   }, {where: {IDJuego: req.params.id}});
     res.redirect(`/VerJuego/${req.params.id}`);
   } catch (err) {
    console.error(err.message); 
@@ -239,9 +269,13 @@ router.get('/EditTeam/:id',reqAuther, async (req, res) => {
   }
 });
 
-router.post('/EditTeam/:id',reqAuther, async (req, res) => {
+router.post('/EditTeam/:id',upload.single('Banner'), reqAuther, async (req, res) => {
   try{
-    //a
+   await DevTeam.update({
+      Nombre: req.body.Nombre,
+      Banner: req.file ? req.file.filename : null,
+      FundadorID: req.session.IDUser
+   }, {where: {IDTeam: req.params.id}});
     res.redirect(`/VerTeam/${req.params.id}`);
   } catch (err) {
    console.error(err.message); 
@@ -258,8 +292,15 @@ router.get('/EditUsuario/:id',reqAuther, async (req, res) => {
   }
 });
 
-router.post('/EditUsuario/:id',reqAuther, async (req, res) => {
+router.post('/EditUsuario/:id',upload.single('Avatar'), reqAuther, async (req, res) => {
   try{
+   await Usuario.update({
+      Nombre: req.body.Nombre,
+      Pass: req.body.Pass,
+      Email: req.body.Email,
+      Avatar: req.file ? req.file.filename : null,
+      Admin: req.body.Admin
+   }, {where: {IDUser: req.params.id}});
     res.redirect(`/VerUsuario/${req.params.id}`);
   } catch (err) {
    console.error(err.message); 
@@ -322,8 +363,10 @@ router.get('/VerLicencias/:id',reqAuther, async (req, res) => {
 
 router.get('/VerTeam/:id',reqAuther, async (req, res) => {
   try{
-    const team = await DevTeam.findByPk(req.params.id);
-    res.render(`VerTeam`, {team});
+    const Team = await DevTeam.findByPk(req.params.id);
+    const equipo = await Usuario.findAll({ where: { Team: Team.IDTeam }});
+    const juegos = await Juego.findAll({ where: { DevID: Team.IDTeam }});
+    res.render(`VerTeam`, {Team, equipo, juegos});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -333,7 +376,10 @@ router.get('/VerTeam/:id',reqAuther, async (req, res) => {
 router.get('/VerUsuario/:id',reqAuther, async (req, res) => {
   try{
     const user = await Usuario.findByPk(req.params.id);
-    res.render(`VerUsuario`, {user});
+    const licencias = await Licencia.findAll({ where: { UserID: user.IDUser }});
+    const juegos = await Juego.findAll({ where: { IDJuego: licencias.map(l => l.JuegoID) }});
+    const Team = await DevTeam.findByPk(user.Team);
+    res.render(`VerUsuario`, {user, juegos, Team});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -349,28 +395,38 @@ router.get('/CrearPublisher',reqAuther, async (req, res) => {
   }
 });
 
-router.post('/CrearPublisher',reqAuther, async (req, res) => {
+router.post('/CrearPublisher',upload.single('Banner'), reqAuther, async (req, res) => {
   try{
-
-    res.redirect(`/VerPublisher/${req.body.IDPublisher}`);
+    const publisher = await Publisher.create({
+      Nombre: req.body.Nombre,
+      Banner: req.file ? req.file.filename : null,
+      FundadorID: req.body.IDUser
+    });
+    await Usuario.update({ Team: publisher.IDPublisher }, { where: { IDUser: req.body.IDUser }});
+    res.redirect(`/VerPublisher/${publisher.IDPublisher}`);
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
   }
 });
 
-router.get('/EditPublisher',reqAuther, async (req, res) => {
+router.get('/EditPublisher/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`EditPublisher`);
+    res.render(`EditPublisher/${req.params.id}`);
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
   }
 });
 
-router.post('/EditPublisher',reqAuther, async (req, res) => {
+router.post('/EditPublisher',upload.single('Banner'), reqAuther, async (req, res) => {
   try{
-    res.redirect(`/VerPublisher/${req.body.IDPublisher}`);
+    const publisher = await Publisher.update({
+      Nombre: req.body.Nombre,
+      Banner: req.file ? req.file.filename : null,
+      FundadorID: req.session.IDUser
+   }, {where: {IDPublisher: req.params.id}});
+    res.redirect(`/VerPublisher/${publisher.IDPublisher}`);
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -390,7 +446,7 @@ router.get('/Error', async (req, res) => {
     res.render('Error'); 
 });
 
-router.post('/Logout', logout);
+router.get('/Logout', logout);
 
 
 app.use('/', router);

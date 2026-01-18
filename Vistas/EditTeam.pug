@@ -3,23 +3,22 @@ include bar.pug
 block content
 div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
          h1 Añadir Dev Team
-         form(action=`/CrearTeam` method="POST" id="formi" style="display: flex; flex-direction: column; gap: 1px;" )
+         form(action=`/CrearTeam` method="POST" id="formi" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1px;" )
            label(for="Nombre") Nombre:
            input(type="text" name="Nombre" id="Nombre" required value=Team.Nombre)
            br
-           label(for="Banner") añadir un Banner:
-           input(type="text" name="Banner" id="Banner" required value=Team.Banner) 
+           label(for="Banner") Banner:
+           input(type="file" name="Banner" id="Banner" accept="image/*" value=Team.Banner)
+           img(src=`/images/${Team.Banner}` alt="Banner actual" style="max-width: 200px; max-height: 200px;") 
            br
-           if Publisher.Fundador == currentUser.IDUser 
+           if Publisher.Fundador == activeUser.IDUser 
             label(for="Fundador") Cambiar Admininistrador:
             select(name="Fundador" id="Fundador")
               each user in Users
                 if user.IDUser != Publisher.Fundador
                   option(value=user.IDUser) #{user.Nombre}
                 else
-                  option(value=user.IDUser selected) #{user.Nombre}
-           label(for="Banner") añadir un Banner:
-           select(name="") 
+                  option(value=user.IDUser selected) #{user.Nombre} 
            br
            button(class="btn btn-primary" type="submit") Guardar
            br

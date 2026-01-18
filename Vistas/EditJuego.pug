@@ -3,7 +3,7 @@ include bar.pug
 block content
 div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
          h1 Editar juego
-         form(action=`/CrearJuego` method="POST" id="formi" style="display: flex; flex-direction: column; gap: 1px;" )
+         form(action=`/CrearJuego` method="POST" id="formi" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1px;" )
            label(for="Nombre") Nombre:
            input(type="text" name="Nombre" id="Nombre" required value=Juego.Nombre)
            br
@@ -13,8 +13,9 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
            label(for="Descripcion") Descripcion:
            input(type="text" name="Descripcion" id="Descripcion" required value=juego.Descripcion)
            br
-           label(for="Imagenes") añadir Imagenes:
-           input(type="text" name="Imagenes" id="Imagenes" required value=Juego.Imagenes) 
+           label(for="Imagen") Portada:
+           input(type="file" name="Imagen" id="Imagen" accept="image/*" value=juego.Imagen)
+           img(src=`/images/${juego.Imagen}` alt="Imagen actual" style="max-width: 200px; max-height: 200px;") 
            br
            //categorias de alguna manera
            button(class="btn btn-primary" type="submit") Guardar

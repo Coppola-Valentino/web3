@@ -3,14 +3,15 @@ include bar.pug
 block content
 div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
          h1 Editar Publisher
-         form(action=`/CrearPublisher` method="POST" id="formi" style="display: flex; flex-direction: column; gap: 1px;" )
+         form(action=`/CrearPublisher` method="POST" id="formi" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1px;" )
            label(for="Nombre") Nombre:
            input(type="text" name="Nombre" id="Nombre" required value=Publisher.Nombre)
            br
-           label(for="Banner") Banners:
-           input(type="text" name="Banner" id="Banner" required value=Publisher.Banner) 
+           label(for="Banner") Banner:
+           input(type="file" name="Banner" id="Banner" accept="image/*" value=Publisher.Banner)
+           img(src=`/images/${Publisher.Banner}` alt="Banner actual" style="max-width: 200px; max-height: 200px;") 
            br
-           if Publisher.Fundador == currentUser.IDUser 
+           if Publisher.Fundador == activeUser.IDUser 
             label(for="Fundador") Cambiar Admininistrador:
             select(name="Fundador" id="Fundador")
               each user in Users

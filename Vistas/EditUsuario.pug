@@ -3,17 +3,22 @@ include bar.pug
 block content
 div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
          h1 Añadir juego
-         form(action=`/CrearUsuario` method="POST" id="formi" style="display: flex; flex-direction: column; gap: 1px;" )
+         form(action=`/CrearUsuario` method="POST" id="formi" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1px;" )
            label(for="Nombre") Nombre:
            input(type="text" name="Nombre" id="Nombre" required value=Usuario.Nombre)
            br
            label(for="Pass") Contraseña:
            input(type="double" name="Pass" id="Pass" required value=Usuario.Pass)
+           button(type="button" id="buton" style="max-width: 150px; max-height: 45px; margin-top: 5px;" onclick="PassToggle()") Mostrar/Ocultar
+           br
+           label(for="Email") Email:
+           input(type="text" name="Email" id="Email" required value=Usuario.Email)
            br
            label(for="Avatar") Avatar:
-           input(type="text" name="Avatar" id="Avatar" required value=Usuario.Avatar)
+           input(type="file" name="Avatar" id="Avatar" accept="image/*" value=Usuario.Avatar)
+           img(src=`/images/${Usuario.Avatar}` alt="Avatar actual" style="max-width: 200px; max-height: 200px;") 
            br
-           if currentUser.Admin == 1 || currentUser.Admin == true 
+           if activeUser.Admin == 1 || activeUser.Admin == true 
             label(for="Admin") Habilitar como Admininistrador:
             input(type="checkbox" name="Admin" id="Admin" required value=Usuario.Admin) 
             br
@@ -21,3 +26,11 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
            br
            a.btn.btn-warning(href="/") Cancelar
            br
+            script.
+                function PassToggle() {
+                  const pass = document.getElementById('Pass');
+                  if (pass.type === "password") {
+                    pass.type = "text";
+                  } else {
+                    pass.type = "password";
+                }};

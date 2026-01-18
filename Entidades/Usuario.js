@@ -24,6 +24,10 @@ Usuario.init({
       type: DataTypes.STRING,
       allowNull: true
     },
+    Email: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     Avatar: {
       type: DataTypes.STRING,
       allowNull: true

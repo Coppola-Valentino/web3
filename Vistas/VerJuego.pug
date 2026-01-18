@@ -2,11 +2,11 @@ include bar.pug
 +bar()
 block content
         div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
-         h1 #{Juego.Nombre}
-         p #{Juego.Imagen}
-         p Desarrollador: #{Juego.dev.Nombre}
+         h1 #{juego.Nombre}
+         img(src=`/Imagenes/${juego.Imagen}`, alt="Imagen", style="width:200px; height:200px; object-fit:cover;") 
+         p Desarrollador: #{dev.Nombre}
          h3 Descripcion:
-         p #{Juego.Descripcion}
+         p #{juego.Descripcion}
          for Categs in Categorias
            p #{Categs.Contenido} -
         div(class="Container-fluid text-center justify-content-center")      
