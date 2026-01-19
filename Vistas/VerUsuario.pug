@@ -5,11 +5,13 @@ block content
          h1 #{user.Nombre}
          img(src=`/Imagenes/${user.Avatar}`, alt="Avatar", style="width:200px; height:200px; object-fit:cover;") 
          if user.Team != null
+          a(href=`/VerTeam/${Team.IDTeam}`)
             p Miembro del Team: #{Team.Nombre}
          p Juegos: 
           for game in juegos
            div(class="Container-fluid text-center justify-content-center")      
             div(class="col btn btn-link" style="Padding-bottom: 40px;")
+              a(href=`/VerJuego/${game.IDJuego}`)
                 p #{game.Nombre}
                 br
                 p #{game.Imagen}

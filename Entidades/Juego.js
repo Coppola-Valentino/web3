@@ -28,6 +28,10 @@ Juego.init({
     Descripcion: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    PublisherID: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
 }, {
 

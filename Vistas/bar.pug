@@ -27,6 +27,12 @@ mixin bar()
              else
               div(class="col-2 btn btn-link")
                 a.btn.btn-primary(href=`/CrearTeam`) Crear Dev Team 
+             if activeUser.Publish != null
+              div(class="col btn btn-link")
+                a.btn.btn-primary(href=`/VerPublisher/${activeUser.Publish}`) Ver Publisher
+             else
+              div(class="col-2 btn btn-link")
+                a.btn.btn-primary(href=`/CrearPublisher`) Publishment 
              div(class="col btn btn-link")
                a.btn.btn-primary(href=`/Logout`) Log Out     
             if !activeUser  

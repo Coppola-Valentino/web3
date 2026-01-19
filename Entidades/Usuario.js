@@ -36,6 +36,10 @@ Usuario.init({
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    Publish: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     Admin: {
       type: DataTypes.BOOLEAN,
       allowNull: true

@@ -8,7 +8,7 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
            input(type="text" name="Nombre" id="Nombre" required)
            br
            label(for="Precio") Precio:
-           input(type="double" name="Precio" id="Precio" required)
+           input(type="number" name="Precio" id="Precio" required)
            br
            label(for="Descripcion") Descripcion:
            input(type="text" name="Descripcion" id="Descripcion" required)
@@ -16,7 +16,12 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
            label(for="Imagen") Portada:
            input(type="file" name="Imagen" id="Imagen" accept="image/*") 
            br
-           //categorias de alguna manera
+           label(for="PublisherID") Publisher:
+           select(name="PublisherID" id="PublisherID")
+             option(value=null) Sin Publisher
+             each publisher in publishers
+               option(value=publisher.IDPublisher)= publisher.Nombre
+           br
            button(class="btn btn-primary" type="submit") Guardar
            br
            a.btn.btn-warning(href="/") Cancelar

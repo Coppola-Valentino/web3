@@ -164,7 +164,8 @@ router.post('/CrearTeam', upload.single('Banner'), reqAuther, async (req, res) =
 
 router.get('/CrearJuego',reqAuther, async (req, res) => {
   try{
-    res.render('CrearJuego');
+    const publishers = await Publisher.findAll();
+    res.render('CrearJuego', {publishers});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -178,7 +179,8 @@ router.post('/CrearJuego', upload.single('Imagen'), reqAuther, async (req, res) 
       Precio: req.body.Precio,
       Imagen: req.file ? req.file.filename : null,
       DevID: req.session.Team,
-      Descripcion: req.body.Descripcion
+      Descripcion: req.body.Descripcion,
+      PublisherID: req.body.PublisherID
     });
     res.redirect(`/VerJuego/${juego.IDJuego}`);
   } catch (err) {
@@ -262,7 +264,12 @@ router.post('/EditJuego/:id', upload.single('Imagen'), reqAuther, async (req, re
 
 router.get('/EditTeam/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`EditTeam/${req.params.id}`);
+    const team = await DevTeam.findByPk(req.params.id);
+    if (team.FundadorID !== req.session.IDUser) {
+      return res.redirect('/Error');
+    }
+    const Users = await Usuario.findAll();
+    res.render(`EditTeam`, {team, Users});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -274,7 +281,7 @@ router.post('/EditTeam/:id',upload.single('Banner'), reqAuther, async (req, res)
    await DevTeam.update({
       Nombre: req.body.Nombre,
       Banner: req.file ? req.file.filename : null,
-      FundadorID: req.session.IDUser
+      FundadorID: req.body.Fundador
    }, {where: {IDTeam: req.params.id}});
     res.redirect(`/VerTeam/${req.params.id}`);
   } catch (err) {
@@ -344,7 +351,10 @@ router.get('/VerBans/:id',reqAuther, async (req, res) => {
 router.get('/VerJuego/:id',reqAuther, async (req, res) => {
   try{
     const juego = await Juego.findByPk(req.params.id);
-    res.render(`VerJuego`, {juego});
+    const team = await DevTeam.findByPk(juego.DevID);
+    const publisher = await Publisher.findByPk(juego.PublisherID);
+    //const categorias = await Categorias.findAll({ where: { JuegoID: juego.IDJuego }});
+    res.render(`VerJuego`, {juego, team, publisher});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -400,9 +410,9 @@ router.post('/CrearPublisher',upload.single('Banner'), reqAuther, async (req, re
     const publisher = await Publisher.create({
       Nombre: req.body.Nombre,
       Banner: req.file ? req.file.filename : null,
-      FundadorID: req.body.IDUser
+      FundadorID: req.session.IDUser
     });
-    await Usuario.update({ Team: publisher.IDPublisher }, { where: { IDUser: req.body.IDUser }});
+    await Usuario.update({ Publish: publisher.IDPublisher }, { where: { IDUser: req.session.IDUser }});
     res.redirect(`/VerPublisher/${publisher.IDPublisher}`);
   } catch (err) {
    console.error(err.message); 
@@ -435,7 +445,10 @@ router.post('/EditPublisher',upload.single('Banner'), reqAuther, async (req, res
 
 router.get('/VerPublisher/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`VerPublisher/${req.params.id}`);
+    const publisher = await Publisher.findByPk(req.params.id);
+    const equipo = await Usuario.findAll({ where: { Publish: publisher.IDPublisher }});
+    const juegos = await Juego.findAll({ where: { PublisherID: publisher.IDPublisher }});
+    res.render(`VerPublisher`, {publisher, equipo, juegos});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');

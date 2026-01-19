@@ -2,20 +2,22 @@ include bar.pug
 +bar()
 block content
 div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
-         h1 Añadir Dev Team
-         form(action=`/CrearTeam` method="POST" id="formi" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1px;" )
+         h1 Dev Team
+         form(action=`/EditTeam/${team.IDTeam}` method="POST" id="formi" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1px;" )
            label(for="Nombre") Nombre:
-           input(type="text" name="Nombre" id="Nombre" required value=Team.Nombre)
+           input(type="text" name="Nombre" id="Nombre" required value=team.Nombre)
            br
            label(for="Banner") Banner:
-           input(type="file" name="Banner" id="Banner" accept="image/*" value=Team.Banner)
-           img(src=`/images/${Team.Banner}` alt="Banner actual" style="max-width: 200px; max-height: 200px;") 
+           input(type="file" name="Banner" id="Banner" accept="image/*" value=team.Banner)
            br
-           if Publisher.Fundador == activeUser.IDUser 
+           p Banner Actual:
+           img(src=`/Imagenes/${team.Banner}` alt="Banner actual" style="max-width: 300px; max-height: 300px;") 
+           br
+           if team.FundadorID == activeUser.IDUser 
             label(for="Fundador") Cambiar Admininistrador:
             select(name="Fundador" id="Fundador")
               each user in Users
-                if user.IDUser != Publisher.Fundador
+                if user.IDUser != team.FundadorID
                   option(value=user.IDUser) #{user.Nombre}
                 else
                   option(value=user.IDUser selected) #{user.Nombre} 

@@ -5,14 +5,14 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
          h1 Registrarse
          form(action=`/CrearUsuario` method="POST" id="formi" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1px;" )
            label(for="Nombre") Nombre:
-           input(type="text" name="Nombre" id="Nombre" required)
+           input(type="text" name="Nombre" id="Nombre" required autocomplete="off")
            br
            label(for="Pass") Contraseña:
-           input(type="password" name="Pass" id="Pass" required) 
+           input(type="password" name="Pass" id="Pass" required autocomplete="off") 
            button(type="button" id="buton" style="max-width: 150px; max-height: 45px; margin-top: 5px;" onclick="PassToggle()") Mostrar/Ocultar
            br
            label(for="Email") Email:
-           input(type="text" name="Email" id="Email" required)
+           input(type="text" name="Email" id="Email" required autocomplete="off")
            br
            label(for="Avatar") Avatar:
            input(type="file" name="Avatar" id="Avatar" accept="image/*")

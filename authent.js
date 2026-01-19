@@ -31,6 +31,7 @@ const auther = async (req, res, next) => {
         req.session.Nombre = user.Nombre;
         req.session.Admin = user.Admin;
         req.session.Team = user.Team;
+        req.session.Publish = user.Publish;
 
         next();
     } catch (err) {
