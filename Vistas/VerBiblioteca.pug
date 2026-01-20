@@ -2,16 +2,19 @@ include bar.pug
 +bar()
 block content
 div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
-        h1 Backlog
+        div(class="Container-fluid text-center justify-content-center")
+          h1 Backlog
         if typeof juegos !== 'undefined' && juegos.length
-         each juego in juegos
+         div(class="Container-fluid text-center justify-content-center")
+          for juego in juegos      
+           div(class="col btn btn-link" style="Padding-bottom: 40px; border: 5px solid #000000ff; display: inline-block; margin: 10px; background: rgb(56, 56, 56);")
             a(href=`/VerJuego/${juego.IDJuego}`)
                 img(src=`/Imagenes/${juego.Imagen}`, alt=juego.Nombre, style="width:100%; height:400px; object-fit:cover;")
                 div(class="carousel-caption d-none d-md-block")
                         h5 #{juego.Nombre}
                         p #{juego.Descripcion}
         else 
-         p No tienes ningun juego aun? 
+           p No tienes ningun juego aun? 
 div(class="Container-fluid text-center justify-content-center")      
  div(class="col btn btn-link" style="Padding-bottom: 40px;")
   a.btn.btn-warning(href=`/`) Volver

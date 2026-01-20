@@ -348,7 +348,7 @@ router.get('/VerBans/:id',reqAuther, async (req, res) => {
   }
 });
 
-router.get('/VerJuego/:id',reqAuther, async (req, res) => {
+router.get('/VerJuego/:id', async (req, res) => {
   try{
     const juego = await Juego.findByPk(req.params.id);
     const team = await DevTeam.findByPk(juego.DevID);
@@ -389,7 +389,8 @@ router.get('/VerUsuario/:id',reqAuther, async (req, res) => {
     const licencias = await Licencia.findAll({ where: { UserID: user.IDUser }});
     const juegos = await Juego.findAll({ where: { IDJuego: licencias.map(l => l.JuegoID) }});
     const Team = await DevTeam.findByPk(user.Team);
-    res.render(`VerUsuario`, {user, juegos, Team});
+    const publi = await Publisher.findByPk(user.Publish);
+    res.render(`VerUsuario`, {user, juegos, Team, publi});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -413,7 +414,7 @@ router.post('/CrearPublisher',upload.single('Banner'), reqAuther, async (req, re
       FundadorID: req.session.IDUser
     });
     await Usuario.update({ Publish: publisher.IDPublisher }, { where: { IDUser: req.session.IDUser }});
-    res.redirect(`/VerPublisher/${publisher.IDPublisher}`);
+    res.redirect(`/VerPublisher/${req.params.id}`);
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -422,21 +423,26 @@ router.post('/CrearPublisher',upload.single('Banner'), reqAuther, async (req, re
 
 router.get('/EditPublisher/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`EditPublisher/${req.params.id}`);
+    const publisher = await Publisher.findByPk(req.params.id);
+    if (publisher.FundadorID !== req.session.IDUser) {
+      return res.redirect('/Error');
+    }
+    const Users = await Usuario.findAll();
+    res.render(`EditPublisher`, {publisher, Users});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
   }
 });
 
-router.post('/EditPublisher',upload.single('Banner'), reqAuther, async (req, res) => {
+router.post('/EditPublisher/:id',upload.single('Banner'), reqAuther, async (req, res) => {
   try{
-    const publisher = await Publisher.update({
+    await Publisher.update({
       Nombre: req.body.Nombre,
       Banner: req.file ? req.file.filename : null,
       FundadorID: req.session.IDUser
    }, {where: {IDPublisher: req.params.id}});
-    res.redirect(`/VerPublisher/${publisher.IDPublisher}`);
+    res.redirect(`/VerPublisher/${req.params.id}`);
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');

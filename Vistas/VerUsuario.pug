@@ -2,13 +2,28 @@ include bar.pug
 +bar()
 block content
         div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
-         h1 #{user.Nombre}
-         img(src=`/Imagenes/${user.Avatar}`, alt="Avatar", style="width:200px; height:200px; object-fit:cover;") 
-         if user.Team != null
-          a(href=`/VerTeam/${Team.IDTeam}`)
-            p Miembro del Team: #{Team.Nombre}
-         p Juegos: 
-          for game in juegos
+         div(class="Container-fluid text-center justify-content-center")
+          br
+          h1 #{user.Nombre}
+          div(class="col btn btn-link" style="border: 5px solid #000000ff; display: inline-block; background: rgb(56, 56, 56);")
+           img(src=`/Imagenes/${user.Avatar}`, alt="Avatar", style="width:200px; height:200px; object-fit:cover;") 
+         div(class="Container-fluid text-center justify-content-center") 
+          if user.Team != null     
+           div(class="col btn btn-link" style="Padding-bottom: 40px; border: 5px solid #000000ff; display: inline-block; margin: 10px; background: rgb(56, 56, 56);")
+            a(href=`/VerTeam/${Team.IDTeam}`)
+             p Miembro del Team: #{Team.Nombre}
+             br
+             img(src=`/Imagenes/${Team.Banner}`, alt="Banner", style="width:100px; height:100px; object-fit:cover;") 
+          if user.Publish != null     
+            div(class="col btn btn-link" style="Padding-bottom: 40px; border: 5px solid #000000ff; display: inline-block; margin: 10px; background: rgb(56, 56, 56);")
+             a(href=`/VerTeam/${publi.IDPublisher}`)
+              p Miembro del Publisher: #{publi.Nombre}
+              br
+              img(src=`/Imagenes/${publi.Banner}`, alt="Banner", style="width:100px; height:100px; object-fit:cover;") 
+         br
+         h3 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Juegos En Biblioteca ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+         br
+         for game in juegos
            div(class="Container-fluid text-center justify-content-center")      
             div(class="col btn btn-link" style="Padding-bottom: 40px;")
               a(href=`/VerJuego/${game.IDJuego}`)
