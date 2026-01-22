@@ -27,8 +27,20 @@ block content
          //for categs in categorias
          //  p #{categs.Contenido} -
          br
+         if licencia.length == 0
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-success(href=`/ConfirmarComp/${juego.IDJuego}`) Comprar
+           br 
+         else 
+           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+            a.btn.btn-success(href=`/VerBiblioteca`) En tu Biblioteca
+            br 
         br
-        div(class="Container-fluid text-center justify-content-center")      
+        div(class="Container-fluid text-center justify-content-center")   
+         if activeUser.Team == team.IDTeam
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-info(href=`/EditJuego/${juego.IDJuego}`) Editar
+           br    
          div(class="col btn btn-link" style="Padding-bottom: 40px;")
           a.btn.btn-warning(href=`/`) Volver
           br

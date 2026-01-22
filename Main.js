@@ -84,7 +84,7 @@ router.get('/Home', async (req, res) => {
 router.get('/VerBiblioteca', async (req, res) => {
     try {
       const lic = await Licencia.findAll({ where: { UserID: req.session.IDUser }});
-      const juegos = await Juego.findAll({ where: { IDJuego: lic.map(l => l.IDJuego) }});
+      const juegos = await Juego.findAll({ where: { IDJuego: lic.map(l => l.JuegoID) }});
       res.render('VerBiblioteca', { juegos });
     } catch (err) {
       console.error(err.message);
@@ -239,7 +239,11 @@ router.post('/CrearAppeal/:id',reqAuther, async (req, res) => {
 
 router.get('/EditJuego/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`EditJuego/${req.params.id}`);
+    const juego = await Juego.findByPk(req.params.id);
+    if (juego.DevID !== req.session.Team) {
+      return res.redirect('/Error');
+    }
+    res.render(`EditJuego`, {juego});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -248,6 +252,14 @@ router.get('/EditJuego/:id',reqAuther, async (req, res) => {
 
 router.post('/EditJuego/:id', upload.single('Imagen'), reqAuther, async (req, res) => {
   try{
+    if (req.body.mantener === 'on') {
+     await Juego.update({
+      Nombre: req.body.Nombre,
+      Precio: req.body.Precio,
+      DevID: req.session.Team,
+      Descripcion: req.body.Descripcion
+   }, {where: {IDJuego: req.params.id}});
+    } else {
    await Juego.update({
       Nombre: req.body.Nombre,
       Precio: req.body.Precio,
@@ -255,6 +267,7 @@ router.post('/EditJuego/:id', upload.single('Imagen'), reqAuther, async (req, re
       DevID: req.session.Team,
       Descripcion: req.body.Descripcion
    }, {where: {IDJuego: req.params.id}});
+  }
     res.redirect(`/VerJuego/${req.params.id}`);
   } catch (err) {
    console.error(err.message); 
@@ -278,11 +291,18 @@ router.get('/EditTeam/:id',reqAuther, async (req, res) => {
 
 router.post('/EditTeam/:id',upload.single('Banner'), reqAuther, async (req, res) => {
   try{
-   await DevTeam.update({
+   if (req.body.mantener === 'on') {
+    await DevTeam.update({
+      Nombre: req.body.Nombre,
+      FundadorID: req.body.Fundador
+    }, {where: {IDTeam: req.params.id}});
+  } else {
+    await DevTeam.update({
       Nombre: req.body.Nombre,
       Banner: req.file ? req.file.filename : null,
       FundadorID: req.body.Fundador
-   }, {where: {IDTeam: req.params.id}});
+    }, {where: {IDTeam: req.params.id}});
+  }
     res.redirect(`/VerTeam/${req.params.id}`);
   } catch (err) {
    console.error(err.message); 
@@ -292,7 +312,11 @@ router.post('/EditTeam/:id',upload.single('Banner'), reqAuther, async (req, res)
 
 router.get('/EditUsuario/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`EditUsuario/${req.params.id}`);
+    const user = await Usuario.findByPk(req.params.id);
+    if (req.session.Admin === false && req.session.IDUser !== user.IDUser) {
+      return res.redirect('/Error');
+    }
+    res.render(`EditUsuario`, {user});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -301,13 +325,22 @@ router.get('/EditUsuario/:id',reqAuther, async (req, res) => {
 
 router.post('/EditUsuario/:id',upload.single('Avatar'), reqAuther, async (req, res) => {
   try{
-   await Usuario.update({
+   if (req.body.mantener === 'on') {
+    await Usuario.update({
+      Nombre: req.body.Nombre,
+      Pass: req.body.Pass,
+      Email: req.body.Email,
+      Admin: req.body.Admin
+    }, {where: {IDUser: req.params.id}});
+  } else {
+    await Usuario.update({
       Nombre: req.body.Nombre,
       Pass: req.body.Pass,
       Email: req.body.Email,
       Avatar: req.file ? req.file.filename : null,
       Admin: req.body.Admin
-   }, {where: {IDUser: req.params.id}});
+    }, {where: {IDUser: req.params.id}});
+  }
     res.redirect(`/VerUsuario/${req.params.id}`);
   } catch (err) {
    console.error(err.message); 
@@ -317,7 +350,7 @@ router.post('/EditUsuario/:id',upload.single('Avatar'), reqAuther, async (req, r
 
 router.get('/Mensajeria/:id',reqAuther, async (req, res) => {
   try{
-    res.render(`Mensajeria/${req.params.id}`);
+    res.render(`Mensajeria`);
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -353,8 +386,9 @@ router.get('/VerJuego/:id', async (req, res) => {
     const juego = await Juego.findByPk(req.params.id);
     const team = await DevTeam.findByPk(juego.DevID);
     const publisher = await Publisher.findByPk(juego.PublisherID);
+    const licencia = await Licencia.findAll({ where: { JuegoID: juego.IDJuego, UserID: req.session.IDUser }});
     //const categorias = await Categorias.findAll({ where: { JuegoID: juego.IDJuego }});
-    res.render(`VerJuego`, {juego, team, publisher});
+    res.render(`VerJuego`, {juego, team, publisher, licencia});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -437,11 +471,18 @@ router.get('/EditPublisher/:id',reqAuther, async (req, res) => {
 
 router.post('/EditPublisher/:id',upload.single('Banner'), reqAuther, async (req, res) => {
   try{
+   if (req.body.mantener === 'on') {
+    await Publisher.update({
+      Nombre: req.body.Nombre,
+      FundadorID: req.session.IDUser
+   }, {where: {IDPublisher: req.params.id}});
+  } else {
     await Publisher.update({
       Nombre: req.body.Nombre,
       Banner: req.file ? req.file.filename : null,
       FundadorID: req.session.IDUser
    }, {where: {IDPublisher: req.params.id}});
+  }
     res.redirect(`/VerPublisher/${req.params.id}`);
   } catch (err) {
    console.error(err.message); 
@@ -459,6 +500,119 @@ router.get('/VerPublisher/:id',reqAuther, async (req, res) => {
    console.error(err.message); 
    res.redirect('/Error');
   }
+});
+
+router.get('/ConfirmarComp/:id', reqAuther, async (req, res) => {
+    try {
+      const juego = await Juego.findByPk(req.params.id);
+      const tarjetas = await Tarjeta.findAll({ where: { UserID: req.session.IDUser }});
+      res.render('ConfirmarComp', { juego, tarjetas });
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.get('/ConfirmarComp2/:id/:idd', reqAuther, async (req, res) => {
+    try {
+      const juego = await Juego.findByPk(req.params.id);
+      const tarjeta = await Tarjeta.findByPk(req.params.idd);
+      res.render('ConfirmarComp2', { juego, tarjeta });
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.post('/ConfirmarComp2/:id/:idd', reqAuther, async (req, res) => {
+    try {
+      const juego = await Juego.findByPk(req.params.id);
+      const tarjeta = await Tarjeta.findByPk(req.params.idd);
+      if (tarjeta.Saldo < juego.Precio) {
+        return res.redirect(`/confirmarComp/${juego.IDJuego}`);
+      }
+      await Tarjeta.update(
+        { Saldo: tarjeta.Saldo - juego.Precio },
+        { where: { IDTarjeta: tarjeta.IDTarjeta } }
+      );
+      await Licencia.create({
+        JuegoID: juego.IDJuego,
+        UserID: req.session.IDUser,
+        Estado: 'Activa'
+      });
+      res.redirect('/VerBiblioteca');
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.get('/VerTarjeta', reqAuther, async (req, res) => {
+    try {
+      const tarjetas = await Tarjeta.findAll({ where: { UserID: req.session.IDUser }});
+      res.render('VerTarjeta', { tarjetas });
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.get('/CrearTarjeta', reqAuther, async (req, res) => {
+    try {
+      res.render('CrearTarjeta');
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.post('/CrearTarjeta', reqAuther, async (req, res) => {
+    try {
+      await Tarjeta.create({
+        UserID: req.session.IDUser,
+        Nombre: req.body.Nombre,
+        Numero: req.body.Numero,
+        NumeroSeguridad: req.body.NumeroSeguridad
+      });
+      res.redirect('VerTarjeta');
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.get('/EditTarjeta/:id', reqAuther, async (req, res) => {
+    try {
+      const tarjeta = await Tarjeta.findByPk(req.params.id);
+      res.render('EditTarjeta', {tarjeta});
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.post('/EditTarjeta/:id', reqAuther, async (req, res) => {
+    try {
+      await Tarjeta.update({
+        Nombre: req.body.Nombre,
+        Saldo: req.body.Saldo
+      }, { where: { IDTarjeta: req.params.id }});
+      res.redirect('/VerTarjeta');
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.get('/BorrarTarjeta/:id', reqAuther, async (req, res) => {
+    try {
+      await Tarjeta.destroy({ where: { IDTarjeta: req.params.id }});
+      const tarjetas = await Tarjeta.findAll({ where: { UserID: req.session.IDUser }});
+      res.render('VerTarjeta', { tarjetas });
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
 });
 
 router.get('/Error', async (req, res) => {

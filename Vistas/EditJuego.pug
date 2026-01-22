@@ -3,19 +3,24 @@ include bar.pug
 block content
 div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
          h1 Editar juego
-         form(action=`/EditJuego/${Juego.IDJuego}` method="POST" id="formi" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1px;" )
+         form(action=`/EditJuego/${juego.IDJuego}` method="POST" id="formi" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1px;" )
            label(for="Nombre") Nombre:
-           input(type="text" name="Nombre" id="Nombre" required value=Juego.Nombre)
+           input(type="text" name="Nombre" id="Nombre" required value=juego.Nombre)
            br
            label(for="Precio") Precio:
-           input(type="double" name="Precio" id="Precio" required value=Juego.Precio)
+           input(type="double" name="Precio" id="Precio" required value=juego.Precio)
            br
            label(for="Descripcion") Descripcion:
            input(type="text" name="Descripcion" id="Descripcion" required value=juego.Descripcion)
            br
            label(for="Imagen") Portada:
            input(type="file" name="Imagen" id="Imagen" accept="image/*" value=juego.Imagen)
-           img(src=`/images/${juego.Imagen}` alt="Imagen actual" style="max-width: 200px; max-height: 200px;") 
+           br
+           label(for="mantener") Conservar imagen actual
+           input(type="checkbox" style="max-width: 170px; margin-top: 10px;" name="mantener" id="mantener" checked)
+           br
+           p Imagen Actual:
+           img(src=`/imagenes/${juego.Imagen}` alt="Imagen actual" style="max-width: 200px; max-height: 200px;") 
            br
            //categorias de alguna manera
            button(class="btn btn-primary" type="submit") Guardar

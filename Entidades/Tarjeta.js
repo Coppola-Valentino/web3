@@ -18,6 +18,10 @@ Tarjeta.init({
       type: DataTypes.STRING,
       allowNull: true
     },
+    Saldo: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     Numero: {
       type: DataTypes.INTEGER,
       allowNull: true

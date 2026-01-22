@@ -1,0 +1,20 @@
+include bar.pug
++bar()
+block content
+        div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+         div(class="Container-fluid text-center justify-content-center")
+          form(action=`/ConfirmarComp2/${juego.IDJuego}/${tarjeta.IDTarjeta}` method="POST" id="formi" style="display: flex; flex-direction: column; gap: 1px;" )
+           br
+           h1 Tarjeta: #{tarjeta.Nombre}
+           br
+           h2 Saldo: $#{tarjeta.Saldo}
+           br
+           h2 ¿Confirma la compra de #{juego.Nombre} por $#{juego.Precio}?
+           br
+           div(class="col btn btn-link" style="Padding-bottom: 40px;")
+            button(class="btn btn-success" type="submit") Confirmar Compra
+           br 
+div(class="Container-fluid text-center justify-content-center")      
+ div(class="col btn btn-link" style="Padding-bottom: 40px;")
+  a.btn.btn-warning(href=`/`) Volver
+  br

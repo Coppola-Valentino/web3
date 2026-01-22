@@ -1,4 +1,21 @@
 include bar.pug
 +bar()
 block content
-//confirmar compra
+       div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+         div(class="Container-fluid text-center justify-content-center")
+          br
+          h1 #{juego.Nombre}
+          div(class="col btn btn-link" style="border: 5px solid #000000ff; display: inline-block; background: rgb(56, 56, 56);") 
+           img(src=`/Imagenes/${juego.Imagen}`, alt="Imagen", style="width:200px; height:200px; object-fit:cover;") 
+         br
+         h2 Precio: $#{juego.Precio}
+         br
+         div(class="Container-fluid text-center justify-content-center")
+          p Seleccione la tarjeta con la que desea realizar la compra:
+          br
+          for tarj in tarjetas    
+           a(href=`/ConfirmarComp2/${juego.IDJuego}/${tarj.IDTarjeta}` style="text-decoration: none; color: white;")  
+            div(class="col btn btn-link" style="Padding-bottom: 40px; border: 5px solid rgb(148, 148, 148); display: inline-block; margin: 10px; background: rgb(56, 56, 56);")
+             p Tarjeta: #{tarj.Nombre}
+             br
+             p Saldo: #{tarj.Saldo}

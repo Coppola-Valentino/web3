@@ -16,7 +16,12 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
            br
            label(for="Avatar") Avatar:
            input(type="file" name="Avatar" id="Avatar" accept="image/*" value=Usuario.Avatar)
-           img(src=`/images/${Usuario.Avatar}` alt="Avatar actual" style="max-width: 200px; max-height: 200px;") 
+           br
+           label(for="mantener") Conservar imagen actual
+           input(type="checkbox" style="max-width: 170px; margin-top: 10px;" name="mantener" id="mantener" checked)
+           br
+           p Avatar Actual:
+           img(src=`/imagenes/${Usuario.Avatar}` alt="Avatar actual" style="max-width: 200px; max-height: 200px;") 
            br
            if activeUser.Admin == 1 || activeUser.Admin == true 
             label(for="Admin") Habilitar como Admininistrador:
