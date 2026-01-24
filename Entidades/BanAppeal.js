@@ -1,9 +1,9 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const { sequelize } = require('../db.js');
 
-class Appeals extends Model {}
+class BanAppeal extends Model {}
 
-Appeals.init({
+BanAppeal.init({
     IDAppeal: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -28,9 +28,9 @@ Appeals.init({
 }, {
 
 sequelize,
-modelName: 'Appeals',
-tableName: 'appeals',
+modelName: 'BanAppeal',
+tableName: 'banappeal',
 timestamps: false
 });
 
-module.exports = Appeals;
+module.exports = BanAppeal;

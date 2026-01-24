@@ -55,7 +55,7 @@ const DevTeam = require('./Entidades/DevTeam');
 const Publisher = require('./Entidades/Publisher');
 const Reseña = require('./Entidades/Reseña');
 const BanList = require('./Entidades/BanList');
-const Appeals = require('./Entidades/Appeals');
+const BanAppeal = require('./Entidades/BanAppeal');
 const Categorias = require('./Entidades/Categorias');
 const Updates = require('./Entidades/Updates');
 
@@ -172,12 +172,15 @@ router.get('/CrearJuego',reqAuther, async (req, res) => {
   }
 });
 
-router.post('/CrearJuego', upload.single('Imagen'), reqAuther, async (req, res) => {
+router.post('/CrearJuego', upload.fields([{ name: 'Imagen', maxCount: 1 },{ name: 'Archivo', maxCount: 1 }]), reqAuther, async (req, res) => {
   try{
+    const imagenFile = req.files['Imagen'] ? req.files['Imagen'][0].filename : null;
+    const archivoFile = req.files['Archivo'] ? req.files['Archivo'][0].filename : null;
     const juego = await Juego.create({
       Nombre: req.body.Nombre,
       Precio: req.body.Precio,
-      Imagen: req.file ? req.file.filename : null,
+      Imagen: imagenFile,
+      Archivo: archivoFile,
       DevID: req.session.Team,
       Descripcion: req.body.Descripcion,
       PublisherID: req.body.PublisherID
@@ -191,21 +194,27 @@ router.post('/CrearJuego', upload.single('Imagen'), reqAuther, async (req, res) 
 
 router.get('/CrearBan/:id',reqAuther, async (req, res) => {
   try{
-    res.render('CrearBan');
+    const Licen = await Licencia.findByPk(req.params.id);
+    res.render('CrearBan', {Licen});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
   }
 });
 
-router.post('/CrearBan/:id/:idd',reqAuther, async (req, res) => {
+router.post('/CrearBan/:id',reqAuther, async (req, res) => {
   try{
+    const Licen = await Licencia.findByPk(req.params.id);
+    const user = await Usuario.findByPk(Licen.UserID);
     await BanList.create({
-      Motivo: req.body.Nombre,
+      Motivo: req.body.Motivo,
       Duracion: req.body.Duracion,
-      IDUser: req.params.idd,
-      IDLicencia: req.params.id
+      UserID: user.IDUser,
+      LicenciaID: req.params.id
     });
+    await Licencia.update({ 
+      Estado: 'Baneada' 
+    }, { where: { IDLic: req.params.id }});
     res.redirect('/Home');
   } catch (err) {
    console.error(err.message); 
@@ -213,9 +222,11 @@ router.post('/CrearBan/:id/:idd',reqAuther, async (req, res) => {
   }
 });
 
-router.get('/CrearAppeal',reqAuther, async (req, res) => {
+router.get('/CrearAppeal/:id',reqAuther, async (req, res) => {
   try{
-    res.render('CrearAppeal');
+    const licen = await Licencia.findByPk(req.params.id);
+    const ban = await BanList.findOne({ where: { LicenciaID: licen.IDLic }});
+    res.render('CrearAppeal', {ban});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -224,7 +235,7 @@ router.get('/CrearAppeal',reqAuther, async (req, res) => {
 
 router.post('/CrearAppeal/:id',reqAuther, async (req, res) => {
   try{
-    await Appeals.create({
+    await BanAppeal.create({
       BanID: req.params.id,
       UserID: null,
       Contenido: req.body.Contenido,
@@ -250,20 +261,39 @@ router.get('/EditJuego/:id',reqAuther, async (req, res) => {
   }
 });
 
-router.post('/EditJuego/:id', upload.single('Imagen'), reqAuther, async (req, res) => {
+router.post('/EditJuego/:id', upload.fields([{ name: 'Imagen', maxCount: 1 },{ name: 'Archivo', maxCount: 1 }]), reqAuther, async (req, res) => {
   try{
-    if (req.body.mantener === 'on') {
+    const imagenFile = req.files['Imagen'] ? req.files['Imagen'][0].filename : null;
+    const archivoFile = req.files['Archivo'] ? req.files['Archivo'][0].filename : null;
+    if (req.body.mantener2 === 'on' && req.body.mantener === 'on') {
      await Juego.update({
       Nombre: req.body.Nombre,
       Precio: req.body.Precio,
       DevID: req.session.Team,
       Descripcion: req.body.Descripcion
    }, {where: {IDJuego: req.params.id}});
-    } else {
+} else if (req.body.mantener2 === 'on') {
+     await Juego.update({
+      Nombre: req.body.Nombre,
+      Precio: req.body.Precio,
+      Imagen: imagenFile,
+      DevID: req.session.Team,
+      Descripcion: req.body.Descripcion
+   }, {where: {IDJuego: req.params.id}});
+} else if (req.body.mantener === 'on') {
+     await Juego.update({
+      Nombre: req.body.Nombre,
+      Precio: req.body.Precio,
+      Archivo: archivoFile,
+      DevID: req.session.Team,
+      Descripcion: req.body.Descripcion
+   }, {where: {IDJuego: req.params.id}});
+} else {
    await Juego.update({
       Nombre: req.body.Nombre,
       Precio: req.body.Precio,
-      Imagen: req.file ? req.file.filename : null,
+      Imagen: imagenFile,
+      Archivo: archivoFile,
       DevID: req.session.Team,
       Descripcion: req.body.Descripcion
    }, {where: {IDJuego: req.params.id}});
@@ -330,16 +360,20 @@ router.post('/EditUsuario/:id',upload.single('Avatar'), reqAuther, async (req, r
       Nombre: req.body.Nombre,
       Pass: req.body.Pass,
       Email: req.body.Email,
-      Admin: req.body.Admin
-    }, {where: {IDUser: req.params.id}});
+      Admin: !!req.body.Admin
+    }, {where: {IDUser: req.params.id},
+        individualHooks: true
+});
   } else {
     await Usuario.update({
       Nombre: req.body.Nombre,
       Pass: req.body.Pass,
       Email: req.body.Email,
       Avatar: req.file ? req.file.filename : null,
-      Admin: req.body.Admin
-    }, {where: {IDUser: req.params.id}});
+      Admin: !!req.body.Admin
+    }, {where: {IDUser: req.params.id},
+        individualHooks: true
+},);
   }
     res.redirect(`/VerUsuario/${req.params.id}`);
   } catch (err) {
@@ -359,12 +393,63 @@ router.get('/Mensajeria/:id',reqAuther, async (req, res) => {
 
 router.get('/VerAppeal/:id',reqAuther, async (req, res) => {
   try{
-    const appeal = await Appeals.findByPk(req.params.id);
+    const appeal = await BanAppeal.findByPk(req.params.id);
     const ban = await BanList.findOne({ where: { IDBan: appeal.BanID }});
-    const admin = await Usuario.findOne({ where: {UserID: appeal.IDUser }});
-    const user = await Usuario.findOne({where: {UserID: ban.IDUser}});
+    const admin = await Usuario.findOne({ where: {IDUser: appeal.UserID }});
+    const user = await Usuario.findOne({where: {IDUser: ban.UserID}});
     res.render(`VerAppeal`, {appeal, ban, admin, user});
   } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.get('/VerAppeals/:id',reqAuther, async (req, res) => {
+  try{
+    const licencia = await Licencia.findByPk(req.params.id);
+    const users = await Usuario.findAll();
+    const appeals = await BanAppeal.findAll({ where: { BanID: licencia.IDLic }});
+    const AppData = appeals.map(appeals => {
+     const admin = users.find(c => c.IDUser === appeals.UserID);
+     return {
+      ...appeals.toJSON(),
+      admin
+     };
+    });
+    res.render(`VerAppeals`, {appeals: AppData, licencia});
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.get('/AceptarAppeal/:id',reqAuther, async (req, res) => {
+ try{
+    await BanAppeal.update({
+      Estado: 'Aceptado',
+      UserID: req.session.IDUser
+    }, { where: { IDAppeal: req.params.id }});
+    const appeal = await BanAppeal.findByPk(req.params.id);
+    const ban = await BanList.findByPk(appeal.BanID);
+    const licencia = await Licencia.findByPk(ban.LicenciaID);
+    await Licencia.update({
+      Estado: 'Activa'
+    }, { where: { IDLic: licencia.IDLic }});
+    res.redirect('/Home');
+   } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.get('/RechazarAppeal/:id',reqAuther, async (req, res) => {
+ try{
+    await BanAppeal.update({
+      Estado: 'Rechazado',
+      UserID: req.session.IDUser
+    }, { where: { IDAppeal: req.params.id }});
+    res.redirect('/Home');
+   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
   }
@@ -373,7 +458,7 @@ router.get('/VerAppeal/:id',reqAuther, async (req, res) => {
 router.get('/VerBans/:id',reqAuther, async (req, res) => {
   try{
     const licencias = await Licencia.findAll({ where: {JuegoID: req.params.id}});
-    const baneos = await BanList.findAll({ where: { IDLicencia: licencias.map(l => l.IDLicencia) }});
+    const baneos = await BanList.findAll({ where: { IDLic: licencias.map(l => l.IDLic) }});
     res.render(`VerBans`, {baneos});
   } catch (err) {
    console.error(err.message); 
@@ -386,9 +471,10 @@ router.get('/VerJuego/:id', async (req, res) => {
     const juego = await Juego.findByPk(req.params.id);
     const team = await DevTeam.findByPk(juego.DevID);
     const publisher = await Publisher.findByPk(juego.PublisherID);
-    const licencia = await Licencia.findAll({ where: { JuegoID: juego.IDJuego, UserID: req.session.IDUser }});
+    const licencia = await Licencia.findOne({ where: { JuegoID: req.params.id, UserID: req.session.IDUser }});
+    const ban = await BanList.findOne({ where: { LicenciaID: licencia ? licencia.IDLic : null }});
     //const categorias = await Categorias.findAll({ where: { JuegoID: juego.IDJuego }});
-    res.render(`VerJuego`, {juego, team, publisher, licencia});
+    res.render(`VerJuego`, {juego, team, publisher, licencia, ban});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -397,8 +483,17 @@ router.get('/VerJuego/:id', async (req, res) => {
 
 router.get('/VerLicencias/:id',reqAuther, async (req, res) => {
   try{
-    const licencias = await Licencia.findAll({ where: { IDJuego: req.params.id }});
-    res.render(`VerLicencias`, {licencias});
+    const juego = await Juego.findByPk(req.params.id);
+    const licencias = await Licencia.findAll({ where: { JuegoID: req.params.id }});
+    const users = await Usuario.findAll({ where: { IDUser: licencias.map(l => l.UserID) }});
+    const LicData = licencias.map(licencs => {
+     const user = users.find(c => c.IDUser === licencs.UserID);
+     return {
+      ...licencs.toJSON(),
+      user
+     };
+    });
+    res.render(`VerLicencias`, {licencias: LicData, juego});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -424,7 +519,8 @@ router.get('/VerUsuario/:id',reqAuther, async (req, res) => {
     const juegos = await Juego.findAll({ where: { IDJuego: licencias.map(l => l.JuegoID) }});
     const Team = await DevTeam.findByPk(user.Team);
     const publi = await Publisher.findByPk(user.Publish);
-    res.render(`VerUsuario`, {user, juegos, Team, publi});
+    const bans = await BanList.findAll({ where: { UserID: user.IDUser }});
+    res.render(`VerUsuario`, {user, juegos, Team, publi, bans});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -609,6 +705,30 @@ router.get('/BorrarTarjeta/:id', reqAuther, async (req, res) => {
       await Tarjeta.destroy({ where: { IDTarjeta: req.params.id }});
       const tarjetas = await Tarjeta.findAll({ where: { UserID: req.session.IDUser }});
       res.render('VerTarjeta', { tarjetas });
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.get('/ElimBan/:id',reqAuther, async (req, res) => {
+  try{
+    await Licencia.update({ 
+      Estado: 'Activa' 
+    }, { where: { IDLic: req.params.id }});
+      const juegos = await Juego.findAll();
+      res.render('Home', { juegos });
+    } catch (err) {
+      console.error(err.message);
+      res.render('Home', { juegos: [] });
+    } 
+});
+
+router.get('/DescargarJuego/:id', async (req, res) => {
+  try {
+    const juego = await Juego.findByPk(req.params.id);
+    const filePath = path.join(__dirname, 'Imagenes', juego.Archivo);
+    res.download(filePath, juego.Archivo);
     } catch (err) {
       console.error(err.message);
       res.redirect('/Error');

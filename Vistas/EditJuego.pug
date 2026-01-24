@@ -22,6 +22,12 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
            p Imagen Actual:
            img(src=`/imagenes/${juego.Imagen}` alt="Imagen actual" style="max-width: 200px; max-height: 200px;") 
            br
+           label(for="Archivo") Archivos del Juego: (.zip o .rar) 
+           input(type="file" name="Archivo" id="Archivo" accept=".zip,.rar, application/zip,application/x-zip-compressed" value=juego.Archivo)
+           br
+           label(for="mantener2") Conservar Archivo actual
+           input(type="checkbox" style="max-width: 170px; margin-top: 10px;" name="mantener2" id="mantener2" checked)
+           br
            //categorias de alguna manera
            button(class="btn btn-primary" type="submit") Guardar
            br

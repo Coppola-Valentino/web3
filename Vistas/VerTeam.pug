@@ -29,10 +29,11 @@ block content
               p #{miembro.Nombre}
              br
              img(src=`/Imagenes/${miembro.Avatar}`, alt="Avatar", style="width:200px; height:200px; object-fit:cover;")
-        div(class="Container-fluid text-center justify-content-center")    
-         div(class="col btn btn-link" style="Padding-bottom: 40px;")  
-          a.btn.btn-success(href=`/CrearJuego`) Añadir Juego
-          br
+        div(class="Container-fluid text-center justify-content-center")   
+         if activeUser.Team == Team.IDTeam 
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-success(href=`/CrearJuego`) Añadir Juego
+           br
          if activeUser.IDUser == Team.FundadorID
           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
            a.btn.btn-info(href=`/EditTeam/${Team.IDTeam}`) Administrar Team

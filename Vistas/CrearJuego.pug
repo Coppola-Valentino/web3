@@ -16,6 +16,9 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
            label(for="Imagen") Portada:
            input(type="file" name="Imagen" id="Imagen" accept="image/*") 
            br
+           label(for="Archivo") Archivos del Juego: (.zip o .rar) 
+           input(type="file" name="Archivo" id="Archivo" accept=".zip,.rar, application/zip,application/x-zip-compressed")
+           br
            label(for="PublisherID") Publisher:
            select(name="PublisherID" id="PublisherID")
              option(value=null) Sin Publisher

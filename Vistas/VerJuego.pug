@@ -27,20 +27,30 @@ block content
          //for categs in categorias
          //  p #{categs.Contenido} -
          br
-         if licencia.length == 0
+         if licencia == null
           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
            a.btn.btn-success(href=`/ConfirmarComp/${juego.IDJuego}`) Comprar
            br 
-         else 
+         else
+          if licencia.Estado == 'Activa' && juego.Archivo
            div(class="col btn btn-link" style="Padding-bottom: 40px;")  
-            a.btn.btn-success(href=`/VerBiblioteca`) En tu Biblioteca
+            a.btn.btn-primary(href=`/DescargarJuego/${juego.IDJuego}`) Descargar
             br 
+          else if licencia.Estado == 'Baneada'
+           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+            p Licencia Revocada debido a: #{ban.Motivo}
+            br
+            a.btn.btn-danger(href=`/CrearAppeal/${licencia.IDLic}`) Apelar
+            br
         br
         div(class="Container-fluid text-center justify-content-center")   
          if activeUser.Team == team.IDTeam
           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
            a.btn.btn-info(href=`/EditJuego/${juego.IDJuego}`) Editar
-           br    
+           br  
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-info(href=`/VerLicencias/${juego.IDJuego}`) Administrar Licencias
+           br 
          div(class="col btn btn-link" style="Padding-bottom: 40px;")
           a.btn.btn-warning(href=`/`) Volver
           br

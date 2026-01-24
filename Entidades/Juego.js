@@ -21,6 +21,10 @@ Juego.init({
       type: DataTypes.STRING,
       allowNull: true
     },
+    Archivo: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     DevID: {
       type: DataTypes.INTEGER,
       allowNull: true
