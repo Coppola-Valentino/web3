@@ -21,6 +21,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const { sequelize } = require('./db');
+const Resena = require('./Entidades/Resena');
 
 app.use(express.urlencoded({ extended: true }));
 app.use('/css', express.static(path.join(__dirname, 'css')));
@@ -53,7 +54,7 @@ const Juego = require('./Entidades/Juego');
 const Licencia = require('./Entidades/Licencia');
 const DevTeam = require('./Entidades/DevTeam');
 const Publisher = require('./Entidades/Publisher');
-const Reseña = require('./Entidades/Reseña');
+const Resena = require('./Entidades/Resena');
 const BanList = require('./Entidades/BanList');
 const BanAppeal = require('./Entidades/BanAppeal');
 const Categorias = require('./Entidades/Categorias');
@@ -473,8 +474,10 @@ router.get('/VerJuego/:id', async (req, res) => {
     const publisher = await Publisher.findByPk(juego.PublisherID);
     const licencia = await Licencia.findOne({ where: { JuegoID: req.params.id, UserID: req.session.IDUser }});
     const ban = await BanList.findOne({ where: { LicenciaID: licencia ? licencia.IDLic : null }});
-    //const categorias = await Categorias.findAll({ where: { JuegoID: juego.IDJuego }});
-    res.render(`VerJuego`, {juego, team, publisher, licencia, ban});
+    const resenas = await Resena.findAll({ where: { JuegoID: juego.IDJuego }});
+    const resen = await Resena.findOne({ where: { JuegoID: juego.IDJuego, LicID: licencia ? licencia.IDLic : null }});
+    const categorias = await Categorias.findAll({ where: { JuegoID: juego.IDJuego }});
+    res.render(`VerJuego`, {juego, team, publisher, licencia, ban, resenas, resen, categorias});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -733,6 +736,94 @@ router.get('/DescargarJuego/:id', async (req, res) => {
       console.error(err.message);
       res.redirect('/Error');
     } 
+});
+
+router.get('/CrearResena/:id', reqAuther, async (req, res) => {
+    try {
+      const juego = await Juego.findByPk(req.params.id);
+      res.render('CrearResena', {juego});
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.post('/CrearResena/:id', reqAuther, async (req, res) => {
+    try {
+      const licencia = await Licencia.findOne({ where: { JuegoID: req.params.id, UserID: req.session.IDUser }});
+      await Resena.create({
+        LicID: licencia.IDLic,
+        JuegoID: req.params.id,
+        Numero: req.body.Numero,
+        Texto: req.body.Texto,
+        Fecha: new Date()
+      });
+      res.redirect(`/Home`);
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.get('/EditResena/:id/:idd', reqAuther, async (req, res) => {
+    try {
+      const juego = await Juego.findByPk(req.params.id);
+      const resena = await Resena.findByPk(req.params.idd);
+      res.render('EditResena', {juego, resena});
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.post('/EditResena/:id/:idd', reqAuther, async (req, res) => {
+    try {
+      await Resena.update({
+        Numero: req.body.Numero,
+        Texto: req.body.Texto,
+        Fecha: new Date()
+      }, { where: { IDResena: req.params.idd }});
+      res.redirect(`/VerJuego/${req.params.id}`);
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.get('/VerCategorias/:id',reqAuther, async (req, res) => {
+  try{
+    const juego = await Juego.findByPk(req.params.id);
+    const categorias = await Categorias.findAll({ where: { JuegoID: req.params.id }});
+    res.render(`VerCategorias`, {categorias, juego});
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.post('/CrearCategorias/:id',reqAuther, async (req, res) => {
+  try{
+    await Categorias.create({
+      JuegoID: req.params.id,
+      Contenido: req.body.Contenido
+    });
+    res.redirect(`/VerCategorias/${req.params.id}`);
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.get('/ElimCategorias/:id/:idd',reqAuther, async (req, res) => {
+  try{
+    const juego = await Juego.findByPk(req.params.id);
+    await Categorias.destroy({ where: { IDCategoria: req.params.idd }});
+    const categorias = await Categorias.findAll({ where: { JuegoID: req.params.id }});
+    res.render(`VerCategorias`, {categorias, juego});
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
 });
 
 router.get('/Error', async (req, res) => {

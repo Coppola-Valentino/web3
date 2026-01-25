@@ -1,10 +1,10 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const { sequelize } = require('../db.js');
 
-class Reseña extends Model {}
+class Resena extends Model {}
 
-Reseña.init({
-    IDReseña: {
+Resena.init({
+    IDResena: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true
@@ -24,13 +24,17 @@ Reseña.init({
     Numero: {
       type: DataTypes.INTEGER,
       allowNull: true
+    },
+    Fecha: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
     }
 }, {
 
 sequelize,
-modelName: 'Reseña',
-tableName: 'reseña',
+modelName: 'Resena',
+tableName: 'resena',
 timestamps: false
 });
 
-module.exports = Reseña;
+module.exports = Resena;

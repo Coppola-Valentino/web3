@@ -21,27 +21,65 @@ block content
           else
            p Independiente
           br
-         h3 Descripcion:
+         h3 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Descripcion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
          div(style="border: 5px solid #000000ff; display: inline-block; padding-left: 5px; background: rgb(204, 204, 204);")
           p #{juego.Descripcion}
-         //for categs in categorias
-         //  p #{categs.Contenido} -
          br
-         if licencia == null
-          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
-           a.btn.btn-success(href=`/ConfirmarComp/${juego.IDJuego}`) Comprar
-           br 
-         else
-          if licencia.Estado == 'Activa' && juego.Archivo
+         h3 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Categorias ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         div(class="Container-fluid text-center justify-content-center")
+            for categs in categorias
+             div(class="col btn")
+              div(style="border: 2px solid #000000ff; display: inline-block; padding: 10px; background: rgb(204, 204, 204);")
+               p #{categs.Contenido}
+         br
+         h3 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         br
+         div(class="Container-fluid text-center justify-content-center") 
+          if licencia == null
            div(class="col btn btn-link" style="Padding-bottom: 40px;")  
-            a.btn.btn-primary(href=`/DescargarJuego/${juego.IDJuego}`) Descargar
+            a.btn.btn-success(href=`/ConfirmarComp/${juego.IDJuego}`) Comprar
             br 
-          else if licencia.Estado == 'Baneada'
-           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
-            p Licencia Revocada debido a: #{ban.Motivo}
-            br
-            a.btn.btn-danger(href=`/CrearAppeal/${licencia.IDLic}`) Apelar
-            br
+          else
+           if licencia.Estado == 'Activa' && juego.Archivo
+            div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+             a.btn.btn-primary(href=`/DescargarJuego/${juego.IDJuego}`) Descargar
+             br
+            if resen == null
+             div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+              a.btn.btn-info(href=`/CrearResena/${juego.IDJuego}`) Escribir Reseña
+              br
+            else 
+             div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+              a.btn.btn-info(href=`/EditResena/${juego.IDJuego}/${resen.IDResena}`) Editar tu Reseña
+              br
+           else if licencia.Estado == 'Baneada'
+            div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+             p Licencia Revocada debido a: #{ban.Motivo}
+             br
+             a.btn.btn-danger(href=`/CrearAppeal/${licencia.IDLic}`) Apelar
+             br
+         br
+         h2 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Reseñas ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+         div(class="Container-fluid text-center justify-content-center")
+          for resena in resenas
+           if resena.Numero >= 7     
+            div(class="col" style="Min-width: 180px; Min-height: 150px; border: 5px solid rgb(228, 164, 69); display: inline-block; margin: 10px; background: rgb(119, 150, 109);") 
+             br
+             p Calificacion: #{resena.Numero}/10
+             p #{resena.Texto}
+             p Fecha: #{resena.Fecha}
+           else if resena.Numero >=4 && resena.Numero < 7
+            div(class="col" style="Min-width: 180px; Min-height: 150px; border: 5px solid rgb(179, 179, 179); display: inline-block; margin: 10px; background: rgb(219, 219, 44);") 
+             br
+             p Calificacion: #{resena.Numero}/10
+             p #{resena.Texto}
+             p Fecha: #{resena.Fecha}
+           else
+            div(class="col" style="Min-width: 180px; Min-height: 150px; border: 5px solid rgb(56, 56, 56); display: inline-block; margin: 10px; background: rgb(204, 102, 102);") 
+             br
+             p Calificacion: #{resena.Numero}/10
+             p #{resena.Texto}
+             p Fecha: #{resena.Fecha}
         br
         div(class="Container-fluid text-center justify-content-center")   
          if activeUser.Team == team.IDTeam
@@ -51,6 +89,9 @@ block content
           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
            a.btn.btn-info(href=`/VerLicencias/${juego.IDJuego}`) Administrar Licencias
            br 
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-info(href=`/VerCategorias/${juego.IDJuego}`) Administrar Categorias
+           br
          div(class="col btn btn-link" style="Padding-bottom: 40px;")
           a.btn.btn-warning(href=`/`) Volver
           br

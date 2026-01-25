@@ -9,7 +9,7 @@ Categorias.init({
       primaryKey: true,
       autoIncrement: true
     },
-    IDJuego: {
+    JuegoID: {
       type: DataTypes.INTEGER,
       allowNull: true
     },
