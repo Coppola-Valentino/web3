@@ -40,6 +40,10 @@ Usuario.init({
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    Estado: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     Admin: {
       type: DataTypes.BOOLEAN,
       allowNull: true

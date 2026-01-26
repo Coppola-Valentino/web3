@@ -7,6 +7,10 @@ block content
           h1 #{user.Nombre}
           div(class="col btn btn-link" style="border: 5px solid #000000ff; display: inline-block; background: rgb(56, 56, 56);")
            img(src=`/Imagenes/${user.Avatar}`, alt="Avatar", style="width:200px; height:200px; object-fit:cover;") 
+          if user.Estado == 'Baneado'
+            br
+            strong 
+             p(style="color: red;") (El Usuario se encuentra Baneado de la plataforma)
          div(class="Container-fluid text-center justify-content-center") 
           if user.Team != null     
            div(class="col btn btn-link" style="Padding-bottom: 40px; border: 5px solid #000000ff; display: inline-block; margin: 10px; background: rgb(56, 56, 56);")
@@ -14,17 +18,26 @@ block content
              p Miembro del Team: #{Team.Nombre}
              br
              img(src=`/Imagenes/${Team.Banner}`, alt="Banner", style="width:100px; height:100px; object-fit:cover;") 
+             if Team.Estado == 'Baneado'
+              br
+              strong 
+               p(style="color: red;") (Equipo Baneado) 
           if user.Publish != null     
             div(class="col btn btn-link" style="Padding-bottom: 40px; border: 5px solid #000000ff; display: inline-block; margin: 10px; background: rgb(56, 56, 56);")
              a(href=`/VerTeam/${publi.IDPublisher}`)
               p Miembro del Publisher: #{publi.Nombre}
               br
-              img(src=`/Imagenes/${publi.Banner}`, alt="Banner", style="width:100px; height:100px; object-fit:cover;") 
+              img(src=`/Imagenes/${publi.Banner}`, alt="Banner", style="width:100px; height:100px; object-fit:cover;")
+              if publi.Estado == 'Baneado'
+               br
+               strong 
+                p(style="color: red;") (Publisher Baneado)  
          br
          h3 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Juegos En Biblioteca ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
          br
          div(class="Container-fluid text-center justify-content-center")
           for game in juegos      
+           if game.Estado != 'Baneado'
             div(class="col btn btn-link" style="Padding-bottom: 40px;")
               a(href=`/VerJuego/${game.IDJuego}`)
                 p #{game.Nombre}
@@ -39,6 +52,14 @@ block content
           div(class="col btn btn-link" style="Padding-bottom: 40px;")
            a.btn.btn-info(href=`/EditUsuario/${user.IDUser}`) Editar Perfil
            br  
+         if activeUser.Admin == true && user.Estado == 'Activo'
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-info(href=`/BanUsuario/${user.IDUser}`) Banear Usuario
+           br
+         if activeUser.Admin == true && user.Estado == 'Baneado'
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-info(href=`/BanUsuario/${user.IDUser}`) Rehabilitar Usuario
+           br
          div(class="col btn btn-link" style="Padding-bottom: 40px;")
           a.btn.btn-warning(href=`/`) Volver
           br

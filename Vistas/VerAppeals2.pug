@@ -2,26 +2,25 @@ include bar.pug
 +bar()
 block content
 div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
-    h1 Lista de Licencias de #{juego.Nombre}
+    h1 Lista de Apelaciones
     table
      thead
       tr
        th Usuario
+       th Contenido
        th Estado
        th Acciones
         tbody
-         each lic in licencias
+         each appeal2 in appeals2
           tr
+           td 
+            a(href=`/VerUsuario/${appeal2.user.IDUser}`) #{appeal2.user.Nombre}
+           td= appeal2.Contenido
+           td= appeal2.Estado
            td
-            a(href=`/VerUsuario/${lic.user.IDUser}`) #{lic.user.Nombre}
-           td= lic.Estado
-           td
-            if lic.Estado == 'Activa'
-             a.btn.btn-warning(href=`/CrearBan/${lic.IDLic}`) Banear usuario
-            else if lic.Estado == 'Baneada'
-             a.btn.btn-warning(href=`/ElimBan/${lic.IDLic}`) Deshacer
-             br
-             a.btn.btn-info(href=`/VerAppeals/${lic.IDLic}`) ver Apelaciones
+            if appeal2.Estado == 'Pendiente'
+             a.btn.btn-success(href=`/AcceptAppeal/${appeal2.IDAppeal2}`) Aceptar
+             a.btn.btn-danger(href=`/DenegarAppeal/${appeal2.IDAppeal2}`) Denegar
     br
 
 div(class="Container-fluid text-center justify-content-center")    

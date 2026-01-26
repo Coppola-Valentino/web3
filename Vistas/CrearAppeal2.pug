@@ -1,0 +1,13 @@
+include bar.pug
++bar()
+block content
+div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+         form(action=`/CrearAppeal2` method="POST" id="formi" style="display: flex; flex-direction: column; gap: 1px;" )
+           br
+           label(for="Contenido") porque crees el ban deberia ser apelado: 
+           input(type="text" name="Contenido" id="Contenido" required)
+           br
+           button(class="btn btn-primary" type="submit") Guardar
+           br
+           a.btn.btn-warning(href="/") Cancelar
+           br

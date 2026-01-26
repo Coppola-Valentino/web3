@@ -33,6 +33,10 @@ Juego.init({
       type: DataTypes.STRING,
       allowNull: true
     },
+    Estado: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     PublisherID: {
       type: DataTypes.INTEGER,
       allowNull: true

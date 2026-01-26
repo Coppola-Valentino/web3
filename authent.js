@@ -32,6 +32,7 @@ const auther = async (req, res, next) => {
         req.session.Admin = user.Admin;
         req.session.Team = user.Team;
         req.session.Publish = user.Publish;
+        req.session.Estado = user.Estado;
 
         next();
     } catch (err) {
@@ -66,6 +67,9 @@ const logout = (req, res) => {
 const reqAuther = async (req, res, next) => {
     if (!req.session.IDUser) {
         return res.redirect('/Login');
+    }
+    if (req.session.Estado === 'Baneado') {
+        return res.redirect('/Banned');
     }
     next();
 }

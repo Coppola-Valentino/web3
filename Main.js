@@ -57,6 +57,7 @@ const Publisher = require('./Entidades/Publisher');
 const Resena = require('./Entidades/Resena');
 const BanList = require('./Entidades/BanList');
 const BanAppeal = require('./Entidades/BanAppeal');
+const BanAppeal2 = require('./Entidades/BanAppeal2');
 const Categorias = require('./Entidades/Categorias');
 const Updates = require('./Entidades/Updates');
 
@@ -64,7 +65,7 @@ const Updates = require('./Entidades/Updates');
 
 router.get('/', async (req, res) => {
     try {
-      const juegos = await Juego.findAll();
+      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
       res.render('Home', { juegos });
     } catch (err) {
       console.error(err.message);
@@ -74,7 +75,7 @@ router.get('/', async (req, res) => {
 
 router.get('/Home', async (req, res) => {
     try {
-      const juegos = await Juego.findAll();
+      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
       res.render('Home', { juegos });
     } catch (err) {
       console.error(err.message);
@@ -130,7 +131,8 @@ router.post('/CrearUsuario', upload.single('Avatar'), async (req, res) => {
       Email: req.body.Email,
       Avatar: req.file ? req.file.filename : null,
       Team: null,
-      Admin: false
+      Admin: false,
+      Estado: 'Activo'
     });
     res.redirect('/Home');
   } catch (err) {
@@ -153,7 +155,8 @@ router.post('/CrearTeam', upload.single('Banner'), reqAuther, async (req, res) =
     const team = await DevTeam.create({
       Nombre: req.body.Nombre,
       Banner: req.file ? req.file.filename : null,
-      FundadorID: req.session.IDUser
+      FundadorID: req.session.IDUser,
+      Estado: 'Activo'
     });
     await Usuario.update({ Team: team.IDTeam }, { where: { IDUser: req.session.IDUser }});
     res.redirect(`/VerTeam/${team.IDTeam}`);
@@ -184,7 +187,8 @@ router.post('/CrearJuego', upload.fields([{ name: 'Imagen', maxCount: 1 },{ name
       Archivo: archivoFile,
       DevID: req.session.Team,
       Descripcion: req.body.Descripcion,
-      PublisherID: req.body.PublisherID
+      PublisherID: req.body.PublisherID,
+      Estado: 'Activo'
     });
     res.redirect(`/VerJuego/${juego.IDJuego}`);
   } catch (err) {
@@ -544,7 +548,8 @@ router.post('/CrearPublisher',upload.single('Banner'), reqAuther, async (req, re
     const publisher = await Publisher.create({
       Nombre: req.body.Nombre,
       Banner: req.file ? req.file.filename : null,
-      FundadorID: req.session.IDUser
+      FundadorID: req.session.IDUser,
+      Estado: 'Activo'
     });
     await Usuario.update({ Publish: publisher.IDPublisher }, { where: { IDUser: req.session.IDUser }});
     res.redirect(`/VerPublisher/${req.params.id}`);
@@ -719,7 +724,7 @@ router.get('/ElimBan/:id',reqAuther, async (req, res) => {
     await Licencia.update({ 
       Estado: 'Activa' 
     }, { where: { IDLic: req.params.id }});
-      const juegos = await Juego.findAll();
+      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
       res.render('Home', { juegos });
     } catch (err) {
       console.error(err.message);
@@ -826,8 +831,163 @@ router.get('/ElimCategorias/:id/:idd',reqAuther, async (req, res) => {
   }
 });
 
+router.get('/BanJuego/:id',reqAuther, async (req, res) => {
+  try{
+    const juego = await Juego.findByPk(req.params.id);
+    if (juego.Estado === 'Activo') {
+     await Juego.update({ 
+      Estado: 'Baneado' 
+     }, { where: { IDJuego: req.params.id }});
+    } else {
+     await Juego.update({ 
+      Estado: 'Activo' 
+     }, { where: { IDJuego: req.params.id }});
+    }
+      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
+      res.render('Home', { juegos });
+    } catch (err) {
+      console.error(err.message);
+      res.render('Home', { juegos: [] });
+    } 
+});
+
+router.get('/BanPublisher/:id',reqAuther, async (req, res) => {
+  try{
+    const publish = await Publisher.findByPk(req.params.id);
+    if (publish.Estado === 'Activo') {
+     await Publisher.update({ 
+      Estado: 'Baneado' 
+     }, { where: { IDPublisher: req.params.id }});
+    } else {
+     await Publisher.update({ 
+      Estado: 'Activo' 
+     }, { where: { IDPublisher: req.params.id }});
+    }
+      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
+      res.render('Home', { juegos });
+    } catch (err) {
+      console.error(err.message);
+      res.render('Home', { juegos: [] });
+    } 
+});
+
+router.get('/BanTeam/:id',reqAuther, async (req, res) => {
+  try{
+    const team = await DevTeam.findByPk(req.params.id);
+    if (team.Estado === 'Activo') {
+     await DevTeam.update({ 
+      Estado: 'Baneado' 
+     }, { where: { IDTeam: req.params.id }});
+    } else {
+     await DevTeam.update({ 
+      Estado: 'Activo' 
+     }, { where: { IDTeam: req.params.id }});
+    }
+      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
+      res.render('Home', { juegos });
+    } catch (err) {
+      console.error(err.message);
+      res.render('Home', { juegos: [] });
+    } 
+});
+
+router.get('/BanUsuario/:id',reqAuther, async (req, res) => {
+  try{
+    const user = await Usuario.findByPk(req.params.id);
+    if (user.Estado === 'Activo') {
+     await Usuario.update({ 
+      Estado: 'Baneado' 
+     }, { where: { IDUser: req.params.id }});
+    } else {
+     await Usuario.update({ 
+      Estado: 'Activo' 
+     }, { where: { IDUser: req.params.id }});
+    }
+      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
+      res.render('Home', { juegos });
+    } catch (err) {
+      console.error(err.message);
+      res.render('Home', { juegos: [] });
+    } 
+});
+
+router.get('/CrearAppeal2', async (req, res) => {
+  try{
+    res.render('CrearAppeal2');
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.post('/CrearAppeal2', async (req, res) => {
+  try{
+    await BanAppeal2.create({
+      UserID: req.session.IDUser,
+      Contenido: req.body.Contenido,
+      Estado: 'Pendiente'
+    });
+    res.redirect('/Home');
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.get('/VerAppeals2',reqAuther, async (req, res) => {
+  try{
+    const appeals = await BanAppeal2.findAll();
+    const users = await Usuario.findAll({where : {IDUser: appeals.map(a => a.UserID)}});
+    const AppData = appeals.map(appeals => {
+     const user = users.find(c => c.IDUser === appeals.UserID);
+     return {
+      ...appeals.toJSON(),
+      user
+     };
+    });
+    res.render(`VerAppeals2`, {appeals2: AppData});
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.get('/AcceptAppeal/:id',reqAuther, async (req, res) => {
+  try{
+    await BanAppeal2.update({ 
+      Estado: 'Aceptada' 
+    }, { where: { IDAppeal2: req.params.id }});
+    const apeal = await BanAppeal2.findByPk(req.params.id);
+    await Usuario.update({ 
+      Estado: 'Activo' 
+    }, { where: { IDUser: apeal.UserID }});
+      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
+      res.render('Home', { juegos });
+    } catch (err) {
+      console.error(err.message);
+      res.render('Home', { juegos: [] });
+    } 
+});
+
+router.get('/DenegarAppeal/:id',reqAuther, async (req, res) => {
+  try{
+    await BanAppeal2.update({ 
+      Estado: 'Denegada' 
+    }, { where: { IDAppeal2: req.params.id }});
+      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
+      res.render('Home', { juegos });
+    } catch (err) {
+      console.error(err.message);
+      res.render('Home', { juegos: [] });
+    } 
+});
+
 router.get('/Error', async (req, res) => {
     res.render('Error'); 
+});
+
+router.get('/Banned', async (req, res) => {
+    res.render('Banned'); 
 });
 
 router.get('/Logout', logout);

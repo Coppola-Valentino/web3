@@ -6,7 +6,11 @@ block content
           br
           h1 #{juego.Nombre}
           div(class="col btn btn-link" style="border: 5px solid #000000ff; display: inline-block; background: rgb(56, 56, 56);") 
-           img(src=`/Imagenes/${juego.Imagen}`, alt="Imagen", style="width:200px; height:200px; object-fit:cover;") 
+           img(src=`/Imagenes/${juego.Imagen}`, alt="Imagen", style="width:200px; height:200px; object-fit:cover;")
+          if juego.Estado == 'Baneado'
+            br
+            strong 
+             p(style="color: red;") (El Juego se encuentra Baneado de la plataforma) 
          br
          h2 Precio: $#{juego.Precio}
          br
@@ -91,6 +95,14 @@ block content
            br 
           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
            a.btn.btn-info(href=`/VerCategorias/${juego.IDJuego}`) Administrar Categorias
+           br
+         if activeUser.Admin == true && juego.Estado == 'Activo'
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-info(href=`/BanJuego/${juego.IDJuego}`) Banear Juego
+           br
+         if activeUser.Admin == true && juego.Estado == 'Baneado'
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-info(href=`/BanJuego/${juego.IDJuego}`) Rehabilitar Juego
            br
          div(class="col btn btn-link" style="Padding-bottom: 40px;")
           a.btn.btn-warning(href=`/`) Volver

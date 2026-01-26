@@ -1,36 +1,32 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const { sequelize } = require('../db.js');
 
-class DevTeam extends Model {}
+class BanAppeal2 extends Model {}
 
-DevTeam.init({
-    IDTeam: {
+BanAppeal2.init({
+    IDAppeal2: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true
     },
-    Nombre: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    Banner: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    Estado: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    FundadorID: {
+    UserID: {
       type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    Contenido: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    Estado:{
+      type: DataTypes.STRING,
       allowNull: true
     }
 }, {
 
 sequelize,
-modelName: 'DevTeam',
-tableName: 'devteam',
+modelName: 'BanAppeal2',
+tableName: 'banappeal2',
 timestamps: false
 });
 
-module.exports = DevTeam;
+module.exports = BanAppeal2;

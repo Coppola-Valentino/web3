@@ -26,14 +26,17 @@ mixin bar()
               div(class="col btn btn-link")
                 a.btn.btn-primary(href=`/VerTeam/${activeUser.Team}`) Ver Team 
              else
-              div(class="col-2 btn btn-link")
+              div(class="col btn btn-link")
                 a.btn.btn-primary(href=`/CrearTeam`) Crear Dev Team 
              if activeUser.Publish != null
               div(class="col btn btn-link")
                 a.btn.btn-primary(href=`/VerPublisher/${activeUser.Publish}`) Ver Publisher
              else
-              div(class="col-2 btn btn-link")
+              div(class="col btn btn-link")
                 a.btn.btn-primary(href=`/CrearPublisher`) Publishment 
+             if activeUser.Admin == true 
+              div(class="col btn btn-link")
+                a.btn.btn-primary(href=`/VerAppeals2`) Appeals 
              div(class="col btn btn-link")
                a.btn.btn-primary(href=`/Logout`) Log Out     
             if !activeUser  

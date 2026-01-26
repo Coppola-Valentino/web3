@@ -6,7 +6,11 @@ block content
           br
           h1 #{publisher.Nombre}
           div(class="col btn btn-link" style="border: 5px solid #000000ff; display: inline-block; background: rgb(56, 56, 56);") 
-           img(src=`/Imagenes/${publisher.Banner}`, alt="Banner", style="width: 300px; height: 300px; object-fit:cover;") 
+           img(src=`/Imagenes/${publisher.Banner}`, alt="Banner", style="width: 300px; height: 300px; object-fit:cover;")
+          if publisher.Estado == 'Baneado'
+            br
+            strong 
+             p(style="color: red;") (El Publisher se encuentra Baneado de la plataforma) 
          br
          h2 ~~~~~~~~~~~~~~~~~~~~~~~~~~ Juegos Publicados ~~~~~~~~~~~~~~~~~~~~~~~~~  
          div(class="Container-fluid text-center justify-content-center")
@@ -15,7 +19,11 @@ block content
             a(href=`/VerJuego/${game.IDJuego}`)
              p #{game.Nombre}
              br
-             img(src=`/Imagenes/${game.Imagen}`, alt="Imagen", style="width:200px; height:200px; object-fit:cover;") 
+             img(src=`/Imagenes/${game.Imagen}`, alt="Imagen", style="width:200px; height:200px; object-fit:cover;")
+             if game.Estado == 'Baneado'
+              br
+              strong 
+               p(style="color: red;") (Juego Baneado) 
          br
          h2 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Miembros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
          div(class="Container-fluid text-center justify-content-center")
@@ -25,11 +33,23 @@ block content
              p #{miembro.Nombre}
              br
              img(src=`/Imagenes/${miembro.Avatar}`, alt="Avatar", style="width:200px; height:200px; object-fit:cover;")
+             if miembro.Estado == 'Baneado'
+              br
+              strong 
+               p(style="color: red;") (Usuario Baneado) 
         div(class="Container-fluid text-center justify-content-center")  
          if activeUser.IDUser == publisher.FundadorID
           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
            a.btn.btn-info(href=`/EditPublisher/${publisher.IDPublisher}`) Administrar Publisher
+           br
+         if activeUser.Admin == true && publisher.Estado == 'Activo'
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-info(href=`/BanPublisher/${publisher.IDPublisher}`) Banear Publisher
            br    
+         if activeUser.Admin == true && publisher.Estado == 'Baneado'
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-info(href=`/BanPublisher/${publisher.IDPublisher}`) Rehabilitar Publisher
+           br
          div(class="col btn btn-link" style="Padding-bottom: 40px;")
           a.btn.btn-warning(href=`/`) Volver
           br

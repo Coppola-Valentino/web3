@@ -17,6 +17,10 @@ Publisher.init({
       type: DataTypes.STRING,
       allowNull: true
     },
+    Estado: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     FundadorID: {
       type: DataTypes.INTEGER,
       allowNull: true
