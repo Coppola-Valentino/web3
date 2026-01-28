@@ -2,12 +2,12 @@ include bar.pug
 +bar()
 block content
 div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
-    h1 Lista de Licencias de #{juego.Nombre}
+    h1 Historial de Updates de #{juego.Nombre}
     table
      thead
       tr
-       th Usuario
-       th Estado
+       th Nombre
+       th Fecha 
        th Acciones
      tbody(id="PagBody")
     div(id="pagination")
@@ -17,24 +17,20 @@ div(class="Container-fluid text-center justify-content-center")
  div(class="col btn btn-link" style="Padding-bottom: 40px;")
   a.btn.btn-warning(href=`/`) Volver
   br
- div(class="col btn btn-link" style="Padding-bottom: 40px;")
-  a.btn.btn-info(href=`/VerBans/${juego.IDJuego}`) Historial
-  br
 script.
   let page = 1;
   const pageSize = 10;
-  const juegoId = !{JSON.stringify(juego.IDJuego)};
-  function RenderPag(licencias) {
+  const JuegoID = !{JSON.stringify(juego.IDJuego)};
+  function RenderPag(updates) {
     const tbody = document.getElementById('PagBody');
     tbody.innerHTML = '';
-    licencias.forEach(lic => {
+    updates.forEach(update => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><a href="/VerUsuario/${lic.user.IDUser}">${lic.user.Nombre}</a></td>
-        <td>${lic.Estado}</td>
+        <td>${update.Nombre}</td>
+        <td>${update.Fecha}</td>
         <td>
-          ${lic.Estado === 'Activa' ? `<a class="btn btn-warning" href="/CrearBan/${lic.IDLic}">Banear usuario</a>` : ''}
-          ${lic.Estado === 'Baneada' ? `<a class="btn btn-warning" href="/ElimBan/${lic.IDLic}">Deshacer</a><br><a class="btn btn-info" href="/VerAppeals/${lic.IDLic}">ver Apelaciones</a>` : ''}
+          <a class="btn btn-info" href="/VerUpdate/${update.IDUpdate}">Ver Update a Detalle</a>
         </td>
       `;
       tbody.appendChild(tr);
@@ -54,12 +50,12 @@ script.
     fetchPag();
   }
   function fetchPag() {
-    fetch(`/VerLicencias/${juegoId}?page=${page}&pageSize=${pageSize}`, {
+    fetch(`/VerUpdates/${JuegoID}?page=${page}&pageSize=${pageSize}`, {
       headers: { 'Accept': 'application/json' }
     })
       .then(res => res.json())
       .then(data => {
-        RenderPag(data.licencias);
+        RenderPag(data.updates);
         renderPagination(data.total, data.page, data.pageSize);
       });
   }

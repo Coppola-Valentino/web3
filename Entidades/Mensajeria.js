@@ -1,36 +1,36 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const { sequelize } = require('../db.js');
 
-class Updates extends Model {}
+class Mensajeria extends Model {}
 
-Updates.init({
-    IDUpdate: {
+Mensajeria.init({
+    IDMensaje: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true
     },
-    JuegoID: {
+    UserID: {
       type: DataTypes.INTEGER,
       allowNull: true
     },
-    Contenido: {
+    User2ID: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    Texto: {
       type: DataTypes.STRING,
       allowNull: true
     },
-    Fecha: {
-      type: DataTypes.DATEONLY,
-      allowNull: true
-    },
-    Nombre: {
+    Imagen: {
       type: DataTypes.STRING,
       allowNull: true
     }
 }, {
 
 sequelize,
-modelName: 'Updates',
-tableName: 'updates',
+modelName: 'Mensajeria',
+tableName: 'mensajeria',
 timestamps: false
 });
 
-module.exports = Updates;
+module.exports = Mensajeria;

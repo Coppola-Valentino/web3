@@ -59,6 +59,7 @@ const BanList = require('./Entidades/BanList');
 const BanAppeal = require('./Entidades/BanAppeal');
 const BanAppeal2 = require('./Entidades/BanAppeal2');
 const Categorias = require('./Entidades/Categorias');
+const Mensajeria = require('./Entidades/Mensajeria');
 const Updates = require('./Entidades/Updates');
 
 //rutas
@@ -411,9 +412,17 @@ router.get('/VerAppeal/:id',reqAuther, async (req, res) => {
 
 router.get('/VerAppeals/:id',reqAuther, async (req, res) => {
   try{
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const offset = (page - 1) * pageSize;
+
     const licencia = await Licencia.findByPk(req.params.id);
     const users = await Usuario.findAll();
-    const appeals = await BanAppeal.findAll({ where: { BanID: licencia.IDLic }});
+    const { count, rows: appeals } = await BanAppeal.findAndCountAll({
+      where: { BanID: licencia.IDLic },
+      offset,
+      limit: pageSize
+    });
     const AppData = appeals.map(appeals => {
      const admin = users.find(c => c.IDUser === appeals.UserID);
      return {
@@ -421,7 +430,17 @@ router.get('/VerAppeals/:id',reqAuther, async (req, res) => {
       admin
      };
     });
-    res.render(`VerAppeals`, {appeals: AppData, licencia});
+    
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({
+        appeals: AppData,
+        total: count,
+        page,
+        pageSize
+      });
+    }
+
+    res.render(`VerAppeals`, {appeals: AppData, licencia, total: count, page, pageSize });
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -462,9 +481,37 @@ router.get('/RechazarAppeal/:id',reqAuther, async (req, res) => {
 
 router.get('/VerBans/:id',reqAuther, async (req, res) => {
   try{
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const offset = (page - 1) * pageSize;
+
+    const juego = await Juego.findByPk(req.params.id);
     const licencias = await Licencia.findAll({ where: {JuegoID: req.params.id}});
-    const baneos = await BanList.findAll({ where: { IDLic: licencias.map(l => l.IDLic) }});
-    res.render(`VerBans`, {baneos});
+    const { count, rows: bans } = await BanList.findAndCountAll({
+      where: { LicenciaID: licencias.map(l => l.IDLic) },
+      offset,
+      limit: pageSize
+    });
+    const users = await Usuario.findAll({ where: { IDUser: bans.map(b => b.UserID) }});
+    const BanData = bans.map(ban => {
+      const user = users.find(c => c.IDUser === ban.UserID);
+      const lic = licencias.find(l => l.IDLic === ban.LicenciaID);
+      return {
+        ...ban.toJSON(),
+        user,
+        lic
+      };
+    });
+
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({
+        bans: BanData,
+        total: count,
+        page,
+        pageSize
+      });
+    }
+    res.render(`VerBans`, {bans: BanData, juego, total: count, page, pageSize });
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -490,8 +537,15 @@ router.get('/VerJuego/:id', async (req, res) => {
 
 router.get('/VerLicencias/:id',reqAuther, async (req, res) => {
   try{
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const offset = (page - 1) * pageSize;
     const juego = await Juego.findByPk(req.params.id);
-    const licencias = await Licencia.findAll({ where: { JuegoID: req.params.id }});
+    const { count, rows: licencias } = await Licencia.findAndCountAll({
+      where: { JuegoID: req.params.id },
+      offset,
+      limit: pageSize
+    });
     const users = await Usuario.findAll({ where: { IDUser: licencias.map(l => l.UserID) }});
     const LicData = licencias.map(licencs => {
      const user = users.find(c => c.IDUser === licencs.UserID);
@@ -500,7 +554,17 @@ router.get('/VerLicencias/:id',reqAuther, async (req, res) => {
       user
      };
     });
-    res.render(`VerLicencias`, {licencias: LicData, juego});
+
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({
+        licencias: LicData,
+        total: count,
+        page,
+        pageSize
+      });
+    }
+
+    res.render(`VerLicencias`, {licencias: LicData, juego, total: count, page, pageSize });
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -653,8 +717,23 @@ router.post('/ConfirmarComp2/:id/:idd', reqAuther, async (req, res) => {
 
 router.get('/VerTarjeta', reqAuther, async (req, res) => {
     try {
-      const tarjetas = await Tarjeta.findAll({ where: { UserID: req.session.IDUser }});
-      res.render('VerTarjeta', { tarjetas });
+      const page = parseInt(req.query.page) || 1;
+      const pageSize = parseInt(req.query.pageSize) || 10;
+      const offset = (page - 1) * pageSize;
+      const { count, rows: tarjetas } = await Tarjeta.findAndCountAll({
+      where: { UserID: req.session.IDUser },
+      offset,
+      limit: pageSize
+    });
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({
+        tarjetas,
+        total: count,
+        page,
+        pageSize
+      });
+    }
+      res.render('VerTarjeta', { tarjetas, total: count, page, pageSize });
     } catch (err) {
       console.error(err.message);
       res.redirect('/Error');
@@ -676,7 +755,8 @@ router.post('/CrearTarjeta', reqAuther, async (req, res) => {
         UserID: req.session.IDUser,
         Nombre: req.body.Nombre,
         Numero: req.body.Numero,
-        NumeroSeguridad: req.body.NumeroSeguridad
+        NumeroSeguridad: req.body.NumeroSeguridad,
+        Saldo: 0
       });
       res.redirect('VerTarjeta');
     } catch (err) {
@@ -797,9 +877,25 @@ router.post('/EditResena/:id/:idd', reqAuther, async (req, res) => {
 
 router.get('/VerCategorias/:id',reqAuther, async (req, res) => {
   try{
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const offset = (page - 1) * pageSize;
     const juego = await Juego.findByPk(req.params.id);
-    const categorias = await Categorias.findAll({ where: { JuegoID: req.params.id }});
-    res.render(`VerCategorias`, {categorias, juego});
+    const { count, rows: categorias } = await Categorias.findAndCountAll({
+      where: { JuegoID: req.params.id },
+      offset,
+      limit: pageSize
+    });
+    
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({
+        categorias,
+        total: count,
+        page,
+        pageSize
+      });
+    }
+    res.render(`VerCategorias`, {categorias, juego, total: count, page, pageSize });
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -936,16 +1032,30 @@ router.post('/CrearAppeal2', async (req, res) => {
 
 router.get('/VerAppeals2',reqAuther, async (req, res) => {
   try{
-    const appeals = await BanAppeal2.findAll();
-    const users = await Usuario.findAll({where : {IDUser: appeals.map(a => a.UserID)}});
-    const AppData = appeals.map(appeals => {
-     const user = users.find(c => c.IDUser === appeals.UserID);
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const offset = (page - 1) * pageSize;
+    const { count, rows: appeals2 } = await BanAppeal2.findAndCountAll({
+      offset,
+      limit: pageSize
+    });
+    const users = await Usuario.findAll({where : {IDUser: appeals2.map(a => a.UserID)}});
+    const AppData = appeals2.map(appeals2 => {
+     const user = users.find(c => c.IDUser === appeals2.UserID);
      return {
-      ...appeals.toJSON(),
+      ...appeals2.toJSON(),
       user
      };
     });
-    res.render(`VerAppeals2`, {appeals2: AppData});
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({
+        appeals2: AppData,
+        total: count,
+        page,
+        pageSize
+      });
+    }
+    res.render(`VerAppeals2`, {appeals2: AppData, total: count, page, pageSize });
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -980,6 +1090,119 @@ router.get('/DenegarAppeal/:id',reqAuther, async (req, res) => {
       console.error(err.message);
       res.render('Home', { juegos: [] });
     } 
+});
+
+router.get('/Mensajeria',reqAuther, async (req, res) => {
+  try{
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const offset = (page - 1) * pageSize;
+
+    const { count, rows: usuarios } = await Usuario.findAndCountAll({
+      offset,
+      limit: pageSize
+    });
+
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({
+        usuarios,
+        total: count,
+        page,
+        pageSize
+      });
+    }
+    res.render(`VerAppeals2`, {usuarios, total: count, page, pageSize });
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+
+router.get('/VerUpdates/:id',reqAuther, async (req, res) => {
+  try{
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const offset = (page - 1) * pageSize;
+
+    const { count, rows: updates } = await Updates.findAndCountAll({
+      where: { JuegoID: req.params.id },
+      offset,
+      limit: pageSize
+    });
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({
+        updates,
+        total: count,
+        page,
+        pageSize
+      });
+    }
+    const juego = await Juego.findByPk(req.params.id);
+    res.render(`VerUpdates`, {updates, juego, total: count, page, pageSize });
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.get('/VerUpdate/:id',reqAuther, async (req, res) => {
+  try{
+    const update = await Updates.findByPk(req.params.id);
+    res.render(`VerUpdate`, {update});
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.get('/CrearUpdate/:id',reqAuther, async (req, res) => {
+  try{
+    const juego = await Juego.findByPk(req.params.id);
+    res.render(`CrearUpdate`, {juego});
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.post('/CrearUpdate/:id', reqAuther, async (req, res) => {
+  try{
+    await Updates.create({
+      JuegoID: req.params.id,
+      Nombre: req.body.Nombre,
+      Contenido: req.body.Contenido,
+      Fecha: new Date()
+    });
+    res.redirect('/Home');
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.get('/EditUpdate/:id',reqAuther, async (req, res) => {
+  try{
+    const update = await Updates.findByPk(req.params.id);
+    res.render(`EditUpdate`, {update});
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
+});
+
+router.post('/EditUpdate/:id', reqAuther, async (req, res) => {
+  try{
+    await Updates.update({
+      Nombre: req.body.Nombre,
+      Contenido: req.body.Contenido
+    }
+    , { where: { IDUpdate: req.params.id }});
+    res.redirect('/Home');
+  } catch (err) {
+   console.error(err.message); 
+   res.redirect('/Error');
+  }
 });
 
 router.get('/Error', async (req, res) => {

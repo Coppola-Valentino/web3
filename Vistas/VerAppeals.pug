@@ -9,23 +9,56 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
        th Estado
        th Admin Responsable 
        th Acciones
-        tbody
-         each appeal in appeals
-          tr
-           td= appeal.Estado
-           td 
-            if appeal.admin
-                =appeal.admin.Nombre 
-            else 
-                | N/A
-           td
-            if appeal.Estado == 'Pendiente'
-             a.btn.btn-info(href=`/VerAppeal/${appeal.IDAppeal}`) Ver Apelacion a Detalle
-            else if appeal.Estado == 'Denegada'
-             p Apelacion Denegada
+     tbody(id="PagBody")
+    div(id="pagination")
     br
 
 div(class="Container-fluid text-center justify-content-center")    
  div(class="col btn btn-link" style="Padding-bottom: 40px;")
   a.btn.btn-warning(href=`/`) Volver
   br
+script.
+  let page = 1;
+  const pageSize = 10;
+  const IDLicenc = !{JSON.stringify(licencia.IDLic)};
+  function RenderPag(appeals) {
+    const tbody = document.getElementById('PagBody');
+    tbody.innerHTML = '';
+    appeals.forEach(appeal => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><a href="/VerUsuario/${lic.user.IDUser}">${lic.user.Nombre}</a></td>
+        <td>${appeal.Estado}</td>
+        <td>
+          ${appeal.Admin ? `<td>${appeal.admin.Nombre}</td>` : ''}
+        
+          ${appeal.Estado === 'Pendiente' ? `<a class="btn btn-info" href="/VerAppeal/${appeal.IDAppeal}">Ver Apelacion a Detalle</a>` : '<td>Apelacion Denegada</td>'}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+  function renderPagination(total, page, pageSize) {
+    const div = document.getElementById('pagination');
+    const totalPages = Math.ceil(total / pageSize);
+    let html = '';
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button onclick="goToPage(${i})" ${i === page ? 'disabled' : ''}>${i}</button> `;
+    }
+    div.innerHTML = html;
+  }
+  function goToPage(p) {
+    page = p;
+    fetchPag();
+  }
+  function fetchPag() {
+    fetch(`/VerAppeals/${IDLicenc}?page=${page}&pageSize=${pageSize}`, {
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        RenderPag(data.appeals);
+        renderPagination(data.total, data.page, data.pageSize);
+      });
+  }
+  document.addEventListener('DOMContentLoaded', fetchPag);

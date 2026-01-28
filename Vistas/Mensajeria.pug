@@ -2,3 +2,61 @@
 include bar.pug
 +bar()
 block content
+div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+    h1 Lista De Usuarios
+    table
+     thead
+      tr
+       th Usuario
+       th Team
+       th Acciones
+     tbody(id="PagBody")
+    div(id="pagination")
+    br
+div(class="Container-fluid text-center justify-content-center")    
+ div(class="col btn btn-link" style="Padding-bottom: 40px;")
+  a.btn.btn-warning(href=`/`) Volver
+  br
+
+script.
+  let page = 1;
+  const pageSize = 10;
+  function RenderPag(usuarios) {
+    const tbody = document.getElementById('PagBody');
+    tbody.innerHTML = '';
+    usuarios.forEach(usuario => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><img src="/Imagenes/${usuario.Avatar}"></img> ${usuario.Nombre}</td>
+        <td>${usuario.Team.Nombre}</td>
+        <td>
+         <a class="btn btn-info" href="/Mensajes/${usuario.IDUsuario}">  </a>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+  function renderPagination(total, page, pageSize) {
+    const div = document.getElementById('pagination');
+    const totalPages = Math.ceil(total / pageSize);
+    let html = '';
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button onclick="goToPage(${i})" ${i === page ? 'disabled' : ''}>${i}</button> `;
+    }
+    div.innerHTML = html;
+  }
+  function goToPage(p) {
+    page = p;
+    fetchPag();
+  }
+  function fetchPag() {
+    fetch(`/Mensajeria?page=${page}&pageSize=${pageSize}`, {
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        RenderPag(data.usuarios);
+        renderPagination(data.total, data.page, data.pageSize);
+      });
+  }
+  document.addEventListener('DOMContentLoaded', fetchPag);

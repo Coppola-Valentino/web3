@@ -3,7 +3,7 @@ include bar.pug
 +bar()
 block content
 div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
-    h1 Lista de Baneos de #{Juego.Nombre}
+    h1 Historial de Baneos de #{juego.Nombre}
     table
      thead
       tr
@@ -11,15 +11,53 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
        th Razon
        th Hasta
        th Acciones
-        tbody
-         each baneo in baneos
-          tr
-           td= baneo.usuario
-           td= baneo.razon
-           td= baneo.fechaBaneo
-           td
-            a.btn.btn-warning(href=`/ElimBan/${baneo.id}`) Deshacer
+     tbody(id="PagBody")
+    div(id="pagination")
 div(class="Container-fluid text-center justify-content-center")      
  div(class="col btn btn-link" style="Padding-bottom: 40px;")
   a.btn.btn-warning(href=`/`) Volver
   br
+script.
+  let page = 1;
+  const pageSize = 10;
+  const juegoId = !{JSON.stringify(juego.IDJuego)};
+  function RenderPag(bans) {
+    const tbody = document.getElementById('PagBody');
+    tbody.innerHTML = '';
+    bans.forEach(ban => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><a href="/VerUsuario/${ban.user.IDUser}">${ban.user.Nombre}</a></td>
+        <td>${ban.Motivo}</td>
+        <td>${ban.Duracion}</td>
+        <td>
+         ${ban.lic.Estado !== 'Activa' ? `<a href="/ElimBan/${ban.lic.IDLic}">Deshacer</a>` : 'Licencia Activa Actualmente'}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+  function renderPagination(total, page, pageSize) {
+    const div = document.getElementById('pagination');
+    const totalPages = Math.ceil(total / pageSize);
+    let html = '';
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button onclick="goToPage(${i})" ${i === page ? 'disabled' : ''}>${i}</button> `;
+    }
+    div.innerHTML = html;
+  }
+  function goToPage(p) {
+    page = p;
+    fetchPag();
+  }
+  function fetchPag() {
+    fetch(`/VerBans/${juegoId}?page=${page}&pageSize=${pageSize}`, {
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        RenderPag(data.bans);
+        renderPagination(data.total, data.page, data.pageSize);
+      });
+  }
+  document.addEventListener('DOMContentLoaded', fetchPag);

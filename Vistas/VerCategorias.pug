@@ -8,12 +8,8 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
       tr
        th Categoria
        th Acciones
-        tbody
-         each cat in categorias
-          tr
-           td= cat.Contenido
-           td
-             a.btn.btn-warning(href=`/ElimCategorias/${juego.IDJuego}/${cat.IDCategoria}`) Eliminar
+     tbody(id="PagBody")
+    div(id="pagination")
     br
     div(class="Container-fluid text-center justify-content-center")  
       form(action=`/CrearCategorias/${juego.IDJuego}` method="POST" id="formi" style="display: flex; flex-direction: column; gap: 1px;" )
@@ -26,3 +22,43 @@ div(class="Container-fluid text-center justify-content-center")
  div(class="col btn btn-link" style="Padding-bottom: 40px;")
   a.btn.btn-warning(href=`/`) Volver
   br
+script.
+  let page = 1;
+  const pageSize = 10;
+  const JuegoID = !{JSON.stringify(juego.IDJuego)};
+  function RenderPag(categorias) {
+    const tbody = document.getElementById('PagBody');
+    tbody.innerHTML = '';
+    categorias.forEach(cat => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${cat.Contenido}</td>
+        <td><a class="btn btn-warning" href="/ElimCategorias/${JuegoID}/${cat.IDCategoria}"> Eliminar </a></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+  function renderPagination(total, page, pageSize) {
+    const div = document.getElementById('pagination');
+    const totalPages = Math.ceil(total / pageSize);
+    let html = '';
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button onclick="goToPage(${i})" ${i === page ? 'disabled' : ''}>${i}</button> `;
+    }
+    div.innerHTML = html;
+  }
+  function goToPage(p) {
+    page = p;
+    fetchPag();
+  }
+  function fetchPag() {
+    fetch(`/VerCategorias/${JuegoID}?page=${page}&pageSize=${pageSize}`, {
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        RenderPag(data.categorias);
+        renderPagination(data.total, data.page, data.pageSize);
+      });
+  }
+  document.addEventListener('DOMContentLoaded', fetchPag);

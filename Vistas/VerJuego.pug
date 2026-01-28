@@ -48,6 +48,9 @@ block content
             div(class="col btn btn-link" style="Padding-bottom: 40px;")  
              a.btn.btn-primary(href=`/DescargarJuego/${juego.IDJuego}`) Descargar
              br
+            div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+             a.btn.btn-info(href=`/VerUpdates/${juego.IDJuego}`) Historial de Updates
+             br
             if resen == null
              div(class="col btn btn-link" style="Padding-bottom: 40px;")  
               a.btn.btn-info(href=`/CrearResena/${juego.IDJuego}`) Escribir Reseña
@@ -95,6 +98,9 @@ block content
            br 
           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
            a.btn.btn-info(href=`/VerCategorias/${juego.IDJuego}`) Administrar Categorias
+           br
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-info(href=`/CrearUpdate/${juego.IDJuego}`) Añadir Update
            br
          if activeUser.Admin == true && juego.Estado == 'Activo'
           div(class="col btn btn-link" style="Padding-bottom: 40px;")  

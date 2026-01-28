@@ -10,15 +10,9 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
        th Numero de Tarjeta
        th Saldo
        th Acciones
-        tbody
-         each tarjeta in tarjetas
-          tr
-           td= tarjeta.Nombre
-           td= tarjeta.Numero
-           td= tarjeta.Saldo
-           td
-            a.btn.btn-info(href=`/EditTarjeta/${tarjeta.IDTarjeta}`) Administrar Tarjeta
-            a.btn.btn-warning(href=`/BorrarTarjeta/${tarjeta.IDTarjeta}`) Borrar Tarjeta
+     tbody(id="PagBody")
+    div(id="pagination")
+    br
 div(class="Container-fluid text-center justify-content-center")
  div(class="col btn btn-link" style="Padding-bottom: 40px;")
   a.btn.btn-success(href=`/CrearTarjeta`) Añadir Tarjeta
@@ -26,3 +20,47 @@ div(class="Container-fluid text-center justify-content-center")
  div(class="col btn btn-link" style="Padding-bottom: 40px;")
   a.btn.btn-warning(href=`/`) Volver
   br
+script.
+  let page = 1;
+  const pageSize = 10;
+  function RenderPag(tarjetas) {
+    const tbody = document.getElementById('PagBody');
+    tbody.innerHTML = '';
+    tarjetas.forEach(tarjeta => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${tarjeta.Nombre}</td>
+        <td>${tarjeta.Numero}</td>
+        <td>${tarjeta.Saldo}</td>
+        <td>
+         <a class="btn btn-info" href="/EditTarjeta/${tarjeta.IDTarjeta}"> Administrar Tarjeta </a>
+         <a class="btn btn-warning" href="/BorrarTarjeta/${tarjeta.IDTarjeta}"> Borrar Tarjeta </a>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+  function renderPagination(total, page, pageSize) {
+    const div = document.getElementById('pagination');
+    const totalPages = Math.ceil(total / pageSize);
+    let html = '';
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button onclick="goToPage(${i})" ${i === page ? 'disabled' : ''}>${i}</button> `;
+    }
+    div.innerHTML = html;
+  }
+  function goToPage(p) {
+    page = p;
+    fetchPag();
+  }
+  function fetchPag() {
+    fetch(`/VerTarjeta?page=${page}&pageSize=${pageSize}`, {
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        RenderPag(data.tarjetas);
+        renderPagination(data.total, data.page, data.pageSize);
+      });
+  }
+  document.addEventListener('DOMContentLoaded', fetchPag);

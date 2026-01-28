@@ -10,20 +10,55 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
        th Contenido
        th Estado
        th Acciones
-        tbody
-         each appeal2 in appeals2
-          tr
-           td 
-            a(href=`/VerUsuario/${appeal2.user.IDUser}`) #{appeal2.user.Nombre}
-           td= appeal2.Contenido
-           td= appeal2.Estado
-           td
-            if appeal2.Estado == 'Pendiente'
-             a.btn.btn-success(href=`/AcceptAppeal/${appeal2.IDAppeal2}`) Aceptar
-             a.btn.btn-danger(href=`/DenegarAppeal/${appeal2.IDAppeal2}`) Denegar
+     tbody(id="PagBody")
+    div(id="pagination")
     br
 
 div(class="Container-fluid text-center justify-content-center")    
  div(class="col btn btn-link" style="Padding-bottom: 40px;")
   a.btn.btn-warning(href=`/`) Volver
   br
+script.
+  let page = 1;
+  const pageSize = 10;
+  function RenderPag(appeals2) {
+    const tbody = document.getElementById('PagBody');
+    tbody.innerHTML = '';
+    appeals2.forEach(appeal2 => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><a href="/VerUsuario/${appeal2.user.IDUser}">${appeal2.user.Nombre}</a></td>
+        <td>${appeal2.Contenido}</td>
+        <td>${appeal2.Estado}</td>
+        <td>
+          ${appeal2.Estado === 'Pendiente' ? `<a class="btn btn-warning" href="/AcceptAppeal/${appeal2.IDAppeal2}">Aceptar</a>` : ''}
+          ${appeal2.Estado === 'Pendiente' ? `<a class="btn btn-warning" href="/DenegarAppeal/${appeal2.IDAppeal2}">Denegar</a>` : ''}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+  function renderPagination(total, page, pageSize) {
+    const div = document.getElementById('pagination');
+    const totalPages = Math.ceil(total / pageSize);
+    let html = '';
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button onclick="goToPage(${i})" ${i === page ? 'disabled' : ''}>${i}</button> `;
+    }
+    div.innerHTML = html;
+  }
+  function goToPage(p) {
+    page = p;
+    fetchPag();
+  }
+  function fetchPag() {
+    fetch(`/VerAppeals2?page=${page}&pageSize=${pageSize}`, {
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        RenderPag(data.appeals2);
+        renderPagination(data.total, data.page, data.pageSize);
+      });
+  }
+  document.addEventListener('DOMContentLoaded', fetchPag);
