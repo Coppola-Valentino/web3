@@ -2,59 +2,97 @@ include bar.pug
 +bar()
 block content
 div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
-    h1 #{usuario.Nombre}
-    img(src=`/Imagenes/${usuario.Avatar}`, alt="Avatar")
-    table
-     thead
-      tr
-       th 
-     tbody(id="PagBody")
-    div(id="pagination")
+ div#app
+  h1 {{ usuario.Nombre }}
+  img(:src="'/Imagenes/' + usuario.Avatar", style="width:130px; height:130px; object-fit:cover;", alt="Avatar")
+  div.messages
     br
+    div(v-for="mensaje in mensajes" :key="mensaje.IDMensaje")
+      b {{ mensaje.user.Nombre }}:
+      |  {{ mensaje.Texto }}
+      span(v-if="mensaje.Imagen") 
+        img(:src="'/Imagenes/' + mensaje.Imagen", style="max-width:100px;")
+  br
+  div(class="Container-fluid text-center justify-content-center")      
+   div(class="col btn btn-link" style="Padding-bottom: 40px;")      
+    input(type="file" accept="image/*" ref="imagenInput" @change="onFileChange")
+    br
+    input(v-model="Texto" style="width: 1000px;" @keyup.enter="enviarMensaje" placeholder="Escribe un mensaje...")
+    br
+  div(class="Container-fluid text-center justify-content-center")
+   button(@click="enviarMensaje") Enviar
+  br
+  div#pagination
+    button(v-for="n in totalPages" :key="n" @click="goToPage(n)" :disabled="n===page") {{ n }}
 div(class="Container-fluid text-center justify-content-center")    
  div(class="col btn btn-link" style="Padding-bottom: 40px;")
   a.btn.btn-warning(href=`/`) Volver
   br
 
+script(src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js")
+script(src="https://cdn.socket.io/4.7.5/socket.io.min.js")
 script.
-  let page = 1;
-  const pageSize = 10;
-  function RenderPag(mensajes) {
-    const tbody = document.getElementById('PagBody');
-    tbody.innerHTML = '';
-    mensajes.forEach(mensaje => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${mensaje.user.Nombre}</td>
-        <td>${mensaje.Texto}</td>
-        <td>
-         ${mensaje.Imagen !== null ? `<img src="/Imagenes/${mensaje.Imagen}">` : ''}
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-  function renderPagination(total, page, pageSize) {
-    const div = document.getElementById('pagination');
-    const totalPages = Math.ceil(total / pageSize);
-    let html = '';
-    for (let i = 1; i <= totalPages; i++) {
-      html += `<button onclick="goToPage(${i})" ${i === page ? 'disabled' : ''}>${i}</button> `;
+  new Vue({
+    el: '#app',
+    data: {
+      mensajes: [],
+      page: 1,
+      pageSize: 10,
+      total: 0,
+      totalPages: 1,
+      Texto: '',
+      Imagen: null,
+      socket: null,
+      usuario: {
+        IDUser: !{JSON.stringify(usuario.IDUser)},
+        Nombre: !{JSON.stringify(usuario.Nombre)},
+        Avatar: !{JSON.stringify(usuario.Avatar)}
+      }
+    },
+    created() {
+      this.fetchPag();
+      this.socket = io(); 
+      this.socket.emit('join', this.usuario.IDUser); 
+      this.socket.on('new_message', (mensaje) => {
+      this.mensajes.push(mensaje);
+  });
+    },
+    methods: {
+      fetchPag() {
+        fetch(`/Mensajes/${this.usuario.IDUser}?page=${this.page}&pageSize=${this.pageSize}`, {
+          headers: { 'Accept': 'application/json' }
+        })
+          .then(res => res.json())
+          .then(data => {
+            this.mensajes = data.mensajes;
+            this.total = data.total;
+            this.totalPages = Math.ceil(data.total / this.pageSize);
+          });
+      },
+      onFileChange(e) {
+       this.Imagen = e.target.files[0];
+      },
+      goToPage(n) {
+        this.page = n;
+        this.fetchPag();
+      },
+      enviarMensaje() {
+       if (!this.Texto.trim() && !this.Imagen) return;
+       const formData = new FormData();
+       formData.append('Texto', this.Texto);
+       if (this.Imagen) formData.append('Imagen', this.Imagen);
+
+        fetch(`/Mensajes/${this.usuario.IDUser}`, {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(mensaje => {
+          this.mensajes.push(mensaje);
+          this.Texto = '';
+          this.Imagen = null;
+          this.$refs.imagenInput.value = '';
+        });
+      }
     }
-    div.innerHTML = html;
-  }
-  function goToPage(p) {
-    page = p;
-    fetchPag();
-  }
-  function fetchPag() {
-    fetch(`/Mensajes/${usuario.IDUsuario}?page=${page}&pageSize=${pageSize}`, {
-      headers: { 'Accept': 'application/json' }
-    })
-      .then(res => res.json())
-      .then(data => {
-        RenderPag(data.mensajes);
-        renderPagination(data.total, data.page, data.pageSize);
-      });
-  }
-  document.addEventListener('DOMContentLoaded', fetchPag);
+  });

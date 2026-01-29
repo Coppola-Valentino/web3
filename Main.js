@@ -7,6 +7,10 @@ const router = express.Router();
 const { Sequelize, DataTypes } = require('sequelize');
 const { getUser, logout, auther, reqAuther} = require('./authent')
 const multer = require('multer');
+const http = require('http');
+const socketio = require('socket.io');
+const server = http.createServer(app);
+const io = socketio(server);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -24,6 +28,7 @@ const { sequelize } = require('./db');
 const Resena = require('./Entidades/Resena');
 
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -1099,25 +1104,100 @@ router.get('/Mensajeria',reqAuther, async (req, res) => {
     const offset = (page - 1) * pageSize;
 
     const { count, rows: usuarios } = await Usuario.findAndCountAll({
+      where: { IDUser: { [Sequelize.Op.ne]: req.session.IDUser } },
       offset,
       limit: pageSize
+    });
+    const Teams = await DevTeam.findAll();
+    const UserData = usuarios.map(usuario => {
+      const Team = Teams.find(c => c.IDTeam === usuario.Team);
+      return {
+        ...usuario.toJSON(),
+        Team
+      };
     });
 
     if (req.headers.accept && req.headers.accept.includes('application/json')) {
       return res.json({
-        usuarios,
+        usuarios: UserData,
         total: count,
         page,
         pageSize
       });
     }
-    res.render(`VerAppeals2`, {usuarios, total: count, page, pageSize });
+    res.render(`Mensajeria`, {usuarios: UserData, total: count, page, pageSize });
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
   }
 });
 
+router.get('/Mensajes/:id', reqAuther, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const offset = (page - 1) * pageSize;
+
+    const { count, rows: mensajes } = await Mensajeria.findAndCountAll({
+      where: {
+        [Sequelize.Op.or]: [
+          { UserID: req.params.id, User2ID: req.session.IDUser },
+          { UserID: req.session.IDUser, User2ID: req.params.id }
+        ]
+      },
+      offset,
+      limit: pageSize,
+      order: [['IDMensaje', 'ASC']]
+    });
+
+    const users = await Usuario.findAll();
+    const mensajesWithUser = mensajes.map(m => ({
+      ...m.toJSON(),
+      user: users.find(u => u.IDUser === m.User2ID) 
+    }));
+
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({
+        mensajes: mensajesWithUser,
+        total: count,
+        page,
+        pageSize
+      });
+    }
+    const usuario = await Usuario.findByPk(req.params.id);
+    res.render('Mensajes', { mensajes: mensajesWithUser, usuario, total: count, page, pageSize });
+  } catch (err) {
+    console.error(err.message);
+    res.redirect('/Error');
+  }
+});
+
+router.post('/Mensajes/:id', upload.single('Imagen'), reqAuther, async (req, res) => {
+  try {
+    const nuevoMensaje = await Mensajeria.create({
+      UserID: req.params.id,
+      User2ID: req.session.IDUser,
+      Texto: req.body.Texto,
+      Imagen: req.file ? req.file.filename : null,
+    });
+    const user = await Usuario.findByPk(req.session.IDUser);
+    io.to('user_' + req.params.id).emit('new_message', {
+      ...nuevoMensaje.toJSON(),
+      user: user ? user.toJSON() : null
+    });
+    io.to('user_' + req.session.IDUser).emit('new_message', {
+      ...nuevoMensaje.toJSON(),
+      user: user ? user.toJSON() : null
+    });
+    res.json({
+      ...nuevoMensaje.toJSON(),
+      user: user ? user.toJSON() : null
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Error al enviar mensaje' });
+  }
+});
 
 router.get('/VerUpdates/:id',reqAuther, async (req, res) => {
   try{
@@ -1221,12 +1301,18 @@ app.use('/', router);
 app.use('/Imagenes', express.static(path.join(__dirname, 'Imagenes')));
 
 const PORT = 3000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
-  
+});
+
+io.on('connection', (socket) => {
+  socket.on('join', (userId) => {
+    socket.join('user_' + userId);
+  });
 });
   } catch (err) {
     console.error('Fatal error:', err.message);
+    console.error('Fatal error 2:', err);
     process.exit(1);
   }
 })();

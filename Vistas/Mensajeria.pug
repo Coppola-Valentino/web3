@@ -27,10 +27,10 @@ script.
     usuarios.forEach(usuario => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><img src="/Imagenes/${usuario.Avatar}"></img> ${usuario.Nombre}</td>
-        <td>${usuario.Team.Nombre}</td>
+        <td style="Font-size: 35px;" > <a href="/VerUsuario/${usuario.IDUser}"><img style="width:130px; height:130px; object-fit:cover;" src="/Imagenes/${usuario.Avatar}"></img></a> ${usuario.Nombre}</td>
+        <td> <a href="/VerTeam/${usuario.Team.IDTeam}">${usuario.Team.Nombre}</a></td>
         <td>
-         <a class="btn btn-info" href="/Mensajes/${usuario.IDUsuario}">  </a>
+         <a class="btn btn-info" href="/Mensajes/${usuario.IDUser}"> Conversacion </a>
         </td>
       `;
       tbody.appendChild(tr);

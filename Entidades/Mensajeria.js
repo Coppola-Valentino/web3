@@ -9,11 +9,11 @@ Mensajeria.init({
       primaryKey: true,
       autoIncrement: true
     },
-    UserID: {
+    UserID: { //usuario seleccionado
       type: DataTypes.INTEGER,
       allowNull: true
     },
-    User2ID: {
+    User2ID: { //usuario activo
       type: DataTypes.INTEGER,
       allowNull: true
     },
