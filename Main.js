@@ -523,7 +523,7 @@ router.get('/VerBans/:id',reqAuther, async (req, res) => {
   }
 });
 
-router.get('/VerJuego/:id', async (req, res) => {
+router.get('/VerJuego/:id', reqAuther, async (req, res) => {
   try{
     const juego = await Juego.findByPk(req.params.id);
     const team = await DevTeam.findByPk(juego.DevID);

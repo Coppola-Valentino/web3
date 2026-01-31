@@ -14,3 +14,21 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
            br
            a.btn.btn-warning(href="/") Cancelar
            br
+script.
+                document.getElementById('formi').addEventListener('submit', function(event) {
+                  const NomImp = document.getElementById('Nombre');
+                  const PreImp = document.getElementById('Precio');
+                  const DesImp = document.getElementById('Descripcion');
+                  if (NomImp.value.length > 20 || NomImp.value.length < 3) {
+                    alert('El Nombre debe tener entre 3 y 20 caracteres');
+                    event.preventDefault();
+                  }
+                  if (PreImp.value < 0 || PreImp.value > 150) {
+                    alert('Precio No Valido.');
+                    event.preventDefault();
+                  }
+                  if (DesImp.value.length > 200 || DesImp.value.length < 0) {
+                    alert('La Descripcion debe tener entre 0 y 200 caracteres');
+                    event.preventDefault();
+                  }
+                 });

@@ -29,9 +29,9 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
                   } else {
                     pass.type = "password";
                 }}
-                rol.addEventListener('change', updateEspecialidadState);
                 document.getElementById('formi').addEventListener('submit', function(event) {
-                  const userImp = document.getElementById('Usuario');
+                  const userImp = document.getElementById('Nombre');
+                  const EmaImp = document.getElementById('Email');
                   if (userImp.value.length > 20 || userImp.value.length < 6) {
                     alert('El usuario debe tener entre 6 y 20 caracteres');
                     event.preventDefault();
@@ -47,6 +47,10 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
                   }
                   if (passImp.value.search(/[0-9]/) == -1 || passImp.value.search(/[a-z]/i) == -1 || passImp.value.search(/[A-Z]/i) == -1 || passImp.value.search(/[^a-zA-Z0-9]/) == -1) {
                     alert('La contraseña debe contener almenos un numero, una Mayuscula, una minuscula y un caracter especial.');
+                    event.preventDefault();
+                  }
+                  if (EmaImp.value.search(/^\w+@\w+\.(com|edu|ar)/) == -1) {
+                    alert('El email no es valido.');
                     event.preventDefault();
                   }
                  });

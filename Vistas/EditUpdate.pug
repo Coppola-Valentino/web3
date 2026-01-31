@@ -16,3 +16,16 @@ div(class="Container-fluid text-center justify-content-center")
  div(class="col btn btn-link" style="Padding-bottom: 40px;")
   a.btn.btn-warning(href=`/`) Volver
   br
+script.
+                document.getElementById('formi').addEventListener('submit', function(event) {
+                  const NomImp = document.getElementById('Nombre');
+                  const ConImp = document.getElementById('Contenido');
+                  if (NomImp.value.length > 30 || NomImp.value.length < 3) {
+                    alert('El Nombre debe tener entre 3 y 30 caracteres');
+                    event.preventDefault();
+                  }
+                  if (ConImp.value.length < 10) {
+                    alert('El Contenido de la actualizacion debe tener almenos 10 caracteres.');
+                    event.preventDefault();
+                  }
+                 });

@@ -12,7 +12,10 @@ block content
             strong 
              p(style="color: red;") (El Juego se encuentra Baneado de la plataforma) 
          br
-         h2 Precio: $#{juego.Precio}
+         if juego.Precio == 0
+          h2 Precio: Free to Play
+         else 
+          h2 Precio: $#{juego.Precio}
          br
          div(class="Container-fluid text-center justify-content-center")
           p Desarrollado por:

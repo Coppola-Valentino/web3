@@ -17,3 +17,16 @@ div(class="Container-fluid text-center justify-content-center")
  div(class="col btn btn-link" style="Padding-bottom: 40px;")
   a.btn.btn-warning(href=`/VerJuego/${juego.IDJuego}`) Volver
   br
+script.
+                document.getElementById('formi').addEventListener('submit', function(event) {
+                  const TexImp = document.getElementById('Texto');
+                  const NumImp = document.getElementById('Numero');
+                  if (TexImp.value.length > 200) {
+                    alert('La Reseña solo Puede tener hasta 200 caracteres');
+                    event.preventDefault();
+                  }
+                  if (NumImp.value < 0 || NumImp.value > 10) {
+                    alert('Numero No Valido.');
+                    event.preventDefault();
+                  }
+                 });

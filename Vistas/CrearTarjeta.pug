@@ -19,3 +19,21 @@ div(class="Container-fluid text-center justify-content-center")
  div(class="col btn btn-link" style="Padding-bottom: 40px;")
   a.btn.btn-warning(href=`/VerTarjeta`) Volver
   br
+script.
+                document.getElementById('formi').addEventListener('submit', function(event) {
+                  const NomImp = document.getElementById('Nombre');
+                  const NumImp = document.getElementById('Numero');
+                  const SegImp = document.getElementById('NumeroSeguridad');
+                  if (NomImp.value.length > 20 || NomImp.value.length < 3) {
+                    alert('El Nombre debe tener entre 3 y 20 caracteres');
+                    event.preventDefault();
+                  }
+                  if (NumImp.value < 16 || NumImp.value > 16) {
+                    alert('Numero No Valido.');
+                    event.preventDefault();
+                  }
+                  if (SegImp.value < 3 || SegImp.value > 3) {
+                    alert('Numero de Seguridad No Valido.');
+                    event.preventDefault();
+                  }
+                 });

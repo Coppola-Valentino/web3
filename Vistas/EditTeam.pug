@@ -29,3 +29,11 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
            br
            a.btn.btn-warning(href="/") Cancelar
            br
+script.
+                document.getElementById('formi').addEventListener('submit', function(event) {
+                  const NomImp = document.getElementById('Nombre');
+                  if (NomImp.value.length > 30 || NomImp.value.length < 3) {
+                    alert('El Nombre debe tener entre 3 y 30 caracteres');
+                    event.preventDefault();
+                  }
+                 });
