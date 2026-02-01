@@ -61,6 +61,7 @@ const DevTeam = require('./Entidades/DevTeam');
 const Publisher = require('./Entidades/Publisher');
 const Resena = require('./Entidades/Resena');
 const BanList = require('./Entidades/BanList');
+const Friend = require('./Entidades/Friend');
 const BanAppeal = require('./Entidades/BanAppeal');
 const BanAppeal2 = require('./Entidades/BanAppeal2');
 const Categorias = require('./Entidades/Categorias');
@@ -190,7 +191,7 @@ router.post('/CrearJuego', upload.fields([{ name: 'Imagen', maxCount: 1 },{ name
       Nombre: req.body.Nombre,
       Precio: req.body.Precio,
       Imagen: imagenFile,
-      Archivo: archivoFile,
+      Archivo: archivoFile, // la funcionalidad de archivo ademas de avatares e imagenes
       DevID: req.session.Team,
       Descripcion: req.body.Descripcion,
       PublisherID: req.body.PublisherID,
@@ -596,7 +597,13 @@ router.get('/VerUsuario/:id',reqAuther, async (req, res) => {
     const Team = await DevTeam.findByPk(user.Team);
     const publi = await Publisher.findByPk(user.Publish);
     const bans = await BanList.findAll({ where: { UserID: user.IDUser }});
-    res.render(`VerUsuario`, {user, juegos, Team, publi, bans});
+    const friend =await Friend.findOne({ where: { 
+      [Sequelize.Op.or]: [
+        { UserID: req.session.IDUser, User2ID: user.IDUser },
+        { UserID: user.IDUser, User2ID: req.session.IDUser }
+      ]
+    }});
+    res.render(`VerUsuario`, {user, juegos, Team, publi, bans,friend});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -714,6 +721,108 @@ router.post('/ConfirmarComp2/:id/:idd', reqAuther, async (req, res) => {
         Estado: 'Activa'
       });
       res.redirect('/VerBiblioteca');
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.post('/FreeToPlay/:id', reqAuther, async (req, res) => {
+    try {
+      const juego = await Juego.findByPk(req.params.id);
+      await Licencia.create({
+        JuegoID: juego.IDJuego,
+        UserID: req.session.IDUser,
+        Estado: 'Activa'
+      });
+      res.redirect('/VerBiblioteca');
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.get('/FriendList', reqAuther, async (req, res) => {
+    try {
+      const friends = await Friend.findAll({ where: { 
+        [Sequelize.Op.or]: [
+          { UserID: req.session.IDUser },
+          { User2ID: req.session.IDUser }
+        ]
+      }});
+      const users = await Usuario.findAll({ where: { IDUser: friends.map(b => b.UserID).concat(friends.map(b => b.User2ID)) }});
+      const FriData = friends.map(friend => {
+       const user = users.find(c => (c.IDUser === friend.UserID && friend.User2ID === req.session.IDUser) || (c.IDUser === friend.User2ID && friend.UserID === req.session.IDUser));
+       return {
+        ...friend.toJSON(),
+        user
+      };
+    });
+      
+      res.render('FriendList', {friends: FriData});
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.post('/AnadirAmigo/:id', reqAuther, async (req, res) => {
+    try {
+      const user = await Usuario.findByPk(req.params.id);
+      await Friend.create({
+        UserID: user.IDUser,
+        User2ID: req.session.IDUser,
+        Estado: 'Pendiente'
+      });
+      res.redirect('/FriendList');
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.post('/AceptarAmigo/:id', reqAuther, async (req, res) => {
+    try {
+      const user = await Usuario.findByPk(req.params.id);
+      await Friend.update({
+        Estado: 'Aceptado'
+      }, {
+        where: {
+          UserID: user.IDUser,
+          User2ID: req.session.IDUser
+        }
+      });
+      await Friend.update({
+        Estado: 'Aceptado'
+      }, {
+        where: {
+          UserID: req.session.IDUser,
+          User2ID: user.IDUser
+        }
+      });
+      res.redirect('/FriendList');
+    } catch (err) {
+      console.error(err.message);
+      res.redirect('/Error');
+    } 
+});
+
+router.post('/ElimAmigo/:id', reqAuther, async (req, res) => {
+    try {
+      const user = await Usuario.findByPk(req.params.id);
+      await Friend.destroy({
+        where: {
+          UserID: user.IDUser,
+          User2ID: req.session.IDUser
+        }
+      });
+      await Friend.destroy({
+        where: {
+          UserID: req.session.IDUser,
+          User2ID: user.IDUser
+        }
+      });
+      res.redirect('/FriendList');
     } catch (err) {
       console.error(err.message);
       res.redirect('/Error');
@@ -1282,6 +1391,57 @@ router.post('/EditUpdate/:id', reqAuther, async (req, res) => {
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
+  }
+});
+
+// API's para el postman
+
+router.get('/api/juegos', async (req, res) => {
+  try {
+    const juegos = await Juego.findAll({ where: { Estado: 'Activo' } });
+    res.json(juegos);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching games' });
+  }
+});
+
+router.get('/api/juegos/:id/licencias', async (req, res) => {
+  try {
+    const juego = await Juego.findByPk(req.params.id);
+    if (!juego) return res.status(404).json({ error: 'Game not found' });
+    const licencias = await Licencia.findAll({ where: { JuegoID: req.params.id } });
+    res.json(licencias);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching game' });
+  }
+});
+
+router.get('/api/juegos/:id', async (req, res) => {
+  try {
+    const juego = await Juego.findByPk(req.params.id);
+    if (!juego) return res.status(404).json({ error: 'Game not found' });
+    res.json(juego);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching game' });
+  }
+});
+
+router.get('/api/users', async (req, res) => {
+  try {
+    const users = await Usuario.findAll({ where: { Estado: 'Activo' } });
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching games' });
+  }
+});
+
+router.get('/api/users/:id', async (req, res) => {
+  try {
+    const user = await Usuario.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching game' });
   }
 });
 

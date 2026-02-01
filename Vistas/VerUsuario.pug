@@ -11,6 +11,11 @@ block content
             br
             strong 
              p(style="color: red;") (El Usuario se encuentra Baneado de la plataforma)
+          if friend.Estado == 'Aceptado'
+           br
+           strong 
+            p(style="color: green;") (Usted y este usuario son amigos)
+          if friend
          div(class="Container-fluid text-center justify-content-center") 
           if user.Team != null     
            div(class="col btn btn-link" style="Padding-bottom: 40px; border: 5px solid #000000ff; display: inline-block; margin: 10px; background: rgb(56, 56, 56);")
@@ -43,7 +48,12 @@ block content
                 p #{game.Nombre}
                 br
                 img(src=`/Imagenes/${game.Imagen}`, alt=game.Nombre, style="width: 150px; height:150px; object-fit:cover;")
-        div(class="Container-fluid text-center justify-content-center") 
+        div(class="Container-fluid text-center justify-content-center")
+         if friend == null && activeUser.IDUser != user.IDUser
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")
+           form(action=`/AnadirAmigo/${user.IDUser}` method="POST" style="display: inline;")
+            button(class="btn btn-success" type="submit") Enviar Solicitud de Amigo
+            br 
          if activeUser.IDUser == user.IDUser 
           div(class="col btn btn-link" style="Padding-bottom: 40px;")
            a.btn.btn-info(href=`/VerTarjeta`) Administrar Tarjetas

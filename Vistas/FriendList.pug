@@ -1,0 +1,30 @@
+include bar.pug
++bar()
+block content
+div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+        div(class="Container-fluid text-center justify-content-center")
+          h1 Friend List
+        if typeof friends !== 'undefined' && friends.length
+         div(class="Container-fluid text-center justify-content-center")
+          for friend in friends    
+            div(class="col btn btn-link" style="border: 5px solid #000000ff; display: inline-block; margin: 10px; background: rgb(56, 56, 56);")
+             a(href=`/VerUsuario/${friend.user.IDUser}`)
+                img(src=`/Imagenes/${friend.user.Avatar}`, alt=friend.user.Nombre, style="width:650px; height:400px; object-fit:cover;")
+                h2 #{friend.user.Nombre}
+                if friend.user.Estado == 'Baneado'
+                 p(style="color: red;") (Usuario Baneado)
+                if friend.Estado == 'Pendiente' && friend.User2ID != activeUser.IDUser
+                 form(action=`/AceptarAmigo/${friend.user.IDUser}` method="POST" style="display: inline;")
+                  button(class="btn btn-success" type="submit") Aceptar Amistad
+                else if friend.Estado == 'Pendiente' && friend.UserID != activeUser.IDUser
+                 p Solicitud de Amistad Pendiente
+                form(action=`/ElimAmigo/${friend.user.IDUser}` method="POST" style="display: inline; margin-left: 10px;")
+                 button(class="btn btn-danger" type="submit") Rechazar Amistad
+                if friend.Estado == 'Aceptado'
+                 a.btn.btn-info(href=`/Mensajes/${friend.user.IDUser}`) Mensajeria
+        else 
+           h2 Lista Vacia
+div(class="Container-fluid text-center justify-content-center")      
+ div(class="col btn btn-link" style="Padding-bottom: 40px;")
+  a.btn.btn-warning(href=`/`) Volver
+  br

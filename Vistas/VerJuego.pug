@@ -43,9 +43,14 @@ block content
          br
          div(class="Container-fluid text-center justify-content-center") 
           if licencia == null
-           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
-            a.btn.btn-success(href=`/ConfirmarComp/${juego.IDJuego}`) Comprar
-            br 
+           if juego.Precio > 0
+            div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+             a.btn.btn-success(href=`/ConfirmarComp/${juego.IDJuego}`) Comprar
+             br
+           else
+            div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+             a.btn.btn-success(href=`/FreeToPlay/${juego.IDJuego}`) Añadir a Libreria
+             br
           else
            if licencia.Estado == 'Activa' && juego.Archivo
             div(class="col btn btn-link" style="Padding-bottom: 40px;")  
