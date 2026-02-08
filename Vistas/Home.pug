@@ -1,13 +1,13 @@
 include bar.pug
 +bar()
 block content
-div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 20px; background: rgba(255, 255, 255, 1)")
         h1 Floppy Disk Grand Opening!
         br
-        if typeof juegos !== 'undefined' && juegos.length
+        if typeof juegosCar !== 'undefined' && juegosCar.length
             div(id="juegosCarousel" class="carousel slide" data-bs-ride="carousel" style="width: 800px; margin: 0 auto;")
                 div(class="carousel-inner")
-                    each juego, i in juegos
+                    each juego, i in juegosCar
                         div(class=i === 0 ? "carousel-item active" : "carousel-item")
                             a(href=`/VerJuego/${juego.IDJuego}`)
                                 img(src=`/Imagenes/${juego.Imagen}`, alt=juego.Nombre, style="width:100%; height:400px; object-fit:cover;")
@@ -24,3 +24,55 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
             br
         else
             p No hay juegos disponibles.
+        br
+        div(class="Container-fluid text-center justify-content-center")
+         table
+          tbody(id="PagBody")
+         div(id="pagination")
+br
+script.
+  let page = 1;
+  const pageSize = 6;
+  function RenderPag(juegos) {
+    const tbody = document.getElementById('PagBody');
+    tbody.innerHTML = '';
+    juegos.forEach(juego => {
+      const th = document.createElement('th');
+      th.innerHTML = `
+        <td>
+         <div class="col btn btn-link" style="border: 5px solid #000000ff; display: inline-block; margin: 10px; background: rgb(56, 56, 56);">
+          <a href="/VerJuego/${juego.IDJuego}">
+          <img style="width:185px; height:185px; object-fit:cover;" src="/Imagenes/${juego.Imagen}"></img>
+          <br>
+          ${juego.Nombre}
+          </a>
+         </div>
+        </td>
+      `;
+      tbody.appendChild(th);
+    });
+  }
+  function renderPagination(total, page, pageSize) {
+    const div = document.getElementById('pagination');
+    const totalPages = Math.ceil(total / pageSize);
+    let html = '';
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button onclick="goToPage(${i})" ${i === page ? 'disabled' : ''}>${i}</button> `;
+    }
+    div.innerHTML = html;
+  }
+  function goToPage(p) {
+    page = p;
+    fetchPag();
+  }
+  function fetchPag() {
+    fetch(`/Home?page=${page}&pageSize=${pageSize}`, {
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        RenderPag(data.juegos);
+        renderPagination(data.total, data.page, data.pageSize);
+      });
+  }
+  document.addEventListener('DOMContentLoaded', fetchPag);

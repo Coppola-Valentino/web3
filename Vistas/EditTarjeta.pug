@@ -1,7 +1,7 @@
 include bar.pug
 +bar()
 block content
-div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 20px; background: rgba(255, 255, 255, 1)")
          h1 Administrar Tarjeta
          form(action=`/EditTarjeta/${tarjeta.IDTarjeta}` method="POST" id="formi" style="display: flex; flex-direction: column; gap: 1px;" )
            label(for="Nombre") Nombre:
@@ -19,18 +19,8 @@ div(class="Container-fluid text-center justify-content-center")
 script.
                 document.getElementById('formi').addEventListener('submit', function(event) {
                   const NomImp = document.getElementById('Nombre');
-                  const NumImp = document.getElementById('Numero');
-                  const SegImp = document.getElementById('NumeroSeguridad');
                   if (NomImp.value.length > 20 || NomImp.value.length < 3) {
                     alert('El Nombre debe tener entre 3 y 20 caracteres');
-                    event.preventDefault();
-                  }
-                  if (NumImp.value < 16 || NumImp.value > 16) {
-                    alert('Numero No Valido.');
-                    event.preventDefault();
-                  }
-                  if (SegImp.value < 3 || SegImp.value > 3) {
-                    alert('Numero de Seguridad No Valido.');
                     event.preventDefault();
                   }
                  });

@@ -40,6 +40,10 @@ Juego.init({
     PublisherID: {
       type: DataTypes.INTEGER,
       allowNull: true
+    },
+    Nota: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
 }, {
 

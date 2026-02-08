@@ -1,7 +1,7 @@
 include bar.pug
 +bar()
 block content
-div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 20px; background: rgba(255, 255, 255, 1)")
          h1 Editar juego
          form(action=`/EditJuego/${juego.IDJuego}` method="POST" id="formi" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1px;" )
            label(for="Nombre") Nombre:
@@ -31,7 +31,7 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
            //categorias de alguna manera
            button(class="btn btn-primary" type="submit") Guardar
            br
-           a.btn.btn-warning(href="/") Cancelar
+           a.btn.btn-warning(href=`/VerJuego/${juego.IDJuego}`) Cancelar
            br
 script.
                 document.getElementById('formi').addEventListener('submit', function(event) {

@@ -1,7 +1,7 @@
 include bar.pug
 +bar()
 block content
-        div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+        div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 20px; background: rgba(255, 255, 255, 1)")
          div(class="Container-fluid text-center justify-content-center")
           br
           h1 #{juego.Nombre}
@@ -12,10 +12,17 @@ block content
             strong 
              p(style="color: red;") (El Juego se encuentra Baneado de la plataforma) 
          br
-         if juego.Precio == 0
-          h2 Precio: Free to Play
-         else 
-          h2 Precio: $#{juego.Precio}
+         div(class="Container-fluid text-center justify-content-center") 
+          div(class="col btn" style="Padding-bottom: 40px;")
+           if juego.Precio == 0
+            h2 Precio: Free to Play
+           else 
+            h2 Precio: $#{juego.Precio}
+          div(class="col btn" style="Padding-bottom: 40px; Padding-left: 150px;") 
+           if juego.Nota != null
+            h2 Nota Media: #{juego.Nota}/10
+           else
+            h2 Nota Media: Sin Reseñas
          br
          div(class="Container-fluid text-center justify-content-center")
           p Desarrollado por:

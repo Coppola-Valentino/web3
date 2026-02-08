@@ -72,21 +72,66 @@ const Updates = require('./Entidades/Updates');
 
 router.get('/', async (req, res) => {
     try {
-      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
-      res.render('Home', { juegos });
+      const page = parseInt(req.query.page) || 1;
+      const pageSize = parseInt(req.query.pageSize) || 6;
+      const offset = (page - 1) * pageSize;
+
+    const { count, rows: juegos } = await Juego.findAndCountAll({
+      where: {Estado: 'Activo'},
+      offset,
+      limit: pageSize
+    });
+    
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({
+        juegos,
+        total: count,
+        page,
+        pageSize
+      });
+    }
+
+    res.render(`Home`, {juegos, total: count, page, pageSize });
     } catch (err) {
       console.error(err.message);
-      res.render('Home', { juegos: [] });
+      res.redirect('/Error');
     }
 });
 
 router.get('/Home', async (req, res) => {
     try {
-      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
-      res.render('Home', { juegos });
+      const page = parseInt(req.query.page) || 1;
+      const pageSize = parseInt(req.query.pageSize) || 10;
+      const offset = (page - 1) * pageSize;
+
+    const { count, rows: juegos } = await Juego.findAndCountAll({
+      where: {Estado: 'Activo'},
+      offset,
+      limit: pageSize
+    });
+
+      const juegosCar = await Juego.findAll({
+        where: {
+          Estado: 'Activo',
+          Nota: { [Sequelize.Op.gte]: 7 }
+        },
+        limit: 5,
+        order: [['Nota', 'DESC']]
+      });
+
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({
+        juegos,
+        total: count,
+        page,
+        pageSize
+      });
+    }
+
+    res.render(`Home`, {juegos, juegosCar, total: count, page, pageSize });
     } catch (err) {
       console.error(err.message);
-      res.render('Home', { juegos: [] });
+      res.redirect('/Error');
     } 
 });
 
@@ -195,6 +240,7 @@ router.post('/CrearJuego', upload.fields([{ name: 'Imagen', maxCount: 1 },{ name
       DevID: req.session.Team,
       Descripcion: req.body.Descripcion,
       PublisherID: req.body.PublisherID,
+      nota: 0,
       Estado: 'Activo'
     });
     res.redirect(`/VerJuego/${juego.IDJuego}`);
@@ -727,7 +773,7 @@ router.post('/ConfirmarComp2/:id/:idd', reqAuther, async (req, res) => {
     } 
 });
 
-router.post('/FreeToPlay/:id', reqAuther, async (req, res) => {
+router.get('/FreeToPlay/:id', reqAuther, async (req, res) => {
     try {
       const juego = await Juego.findByPk(req.params.id);
       await Licencia.create({
@@ -918,11 +964,10 @@ router.get('/ElimBan/:id',reqAuther, async (req, res) => {
     await Licencia.update({ 
       Estado: 'Activa' 
     }, { where: { IDLic: req.params.id }});
-      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
-      res.render('Home', { juegos });
+      res.redirect('/Home');
     } catch (err) {
       console.error(err.message);
-      res.render('Home', { juegos: [] });
+      res.redirect('/Error');
     } 
 });
 
@@ -957,6 +1002,9 @@ router.post('/CrearResena/:id', reqAuther, async (req, res) => {
         Texto: req.body.Texto,
         Fecha: new Date()
       });
+      await Juego.update({
+        Nota: Sequelize.literal(`(SELECT AVG(Numero) FROM Resena WHERE JuegoID = ${req.params.id})`)
+      }, { where: { IDJuego: req.params.id }});
       res.redirect(`/Home`);
     } catch (err) {
       console.error(err.message);
@@ -982,6 +1030,10 @@ router.post('/EditResena/:id/:idd', reqAuther, async (req, res) => {
         Texto: req.body.Texto,
         Fecha: new Date()
       }, { where: { IDResena: req.params.idd }});
+      await Juego.update({
+        Nota: Sequelize.literal(`(SELECT AVG(Numero) FROM Resena WHERE JuegoID = ${req.params.id})`)
+      }, { where: { IDJuego: req.params.id }
+      })
       res.redirect(`/VerJuego/${req.params.id}`);
     } catch (err) {
       console.error(err.message);
@@ -1053,11 +1105,10 @@ router.get('/BanJuego/:id',reqAuther, async (req, res) => {
       Estado: 'Activo' 
      }, { where: { IDJuego: req.params.id }});
     }
-      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
-      res.render('Home', { juegos });
+      res.redirect('/Home');
     } catch (err) {
       console.error(err.message);
-      res.render('Home', { juegos: [] });
+      res.redirect('/Error');
     } 
 });
 
@@ -1073,11 +1124,10 @@ router.get('/BanPublisher/:id',reqAuther, async (req, res) => {
       Estado: 'Activo' 
      }, { where: { IDPublisher: req.params.id }});
     }
-      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
-      res.render('Home', { juegos });
+      res.redirect('/Home');
     } catch (err) {
       console.error(err.message);
-      res.render('Home', { juegos: [] });
+      res.redirect('/Error');
     } 
 });
 
@@ -1093,11 +1143,10 @@ router.get('/BanTeam/:id',reqAuther, async (req, res) => {
       Estado: 'Activo' 
      }, { where: { IDTeam: req.params.id }});
     }
-      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
-      res.render('Home', { juegos });
+      res.redirect('/Home');
     } catch (err) {
       console.error(err.message);
-      res.render('Home', { juegos: [] });
+      res.redirect('/Error');
     } 
 });
 
@@ -1113,11 +1162,10 @@ router.get('/BanUsuario/:id',reqAuther, async (req, res) => {
       Estado: 'Activo' 
      }, { where: { IDUser: req.params.id }});
     }
-      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
-      res.render('Home', { juegos });
+      res.redirect('/Home');
     } catch (err) {
       console.error(err.message);
-      res.render('Home', { juegos: [] });
+      res.redirect('/Error');
     } 
 });
 
@@ -1185,11 +1233,10 @@ router.get('/AcceptAppeal/:id',reqAuther, async (req, res) => {
     await Usuario.update({ 
       Estado: 'Activo' 
     }, { where: { IDUser: apeal.UserID }});
-      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
-      res.render('Home', { juegos });
+      res.redirect('/Home');
     } catch (err) {
       console.error(err.message);
-      res.render('Home', { juegos: [] });
+      res.redirect('/Error');
     } 
 });
 
@@ -1198,11 +1245,10 @@ router.get('/DenegarAppeal/:id',reqAuther, async (req, res) => {
     await BanAppeal2.update({ 
       Estado: 'Denegada' 
     }, { where: { IDAppeal2: req.params.id }});
-      const juegos = await Juego.findAll({where: {Estado: 'Activo'}});
-      res.render('Home', { juegos });
+      res.redirect('/Home');
     } catch (err) {
       console.error(err.message);
-      res.render('Home', { juegos: [] });
+      res.redirect('/Error');
     } 
 });
 

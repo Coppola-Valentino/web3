@@ -1,7 +1,7 @@
 include bar.pug
 +bar()
 block content
-div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 80px; background: rgba(255, 255, 255, 1)")
+div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; padding-left: 10px; padding-right: 10px; display: flex; justify-content: space-between; flex-direction: column; horizontal-align: center; margin-top: 20px; background: rgba(255, 255, 255, 1)")
  div#app
   h1 {{ usuario.Nombre }}
   img(:src="'/Imagenes/' + usuario.Avatar", style="width:130px; height:130px; object-fit:cover;", alt="Avatar")
