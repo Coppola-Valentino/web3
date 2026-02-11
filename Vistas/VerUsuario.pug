@@ -43,11 +43,11 @@ block content
          div(class="Container-fluid text-center justify-content-center")
           for game in juegos      
            if game.Estado != 'Baneado'
-            div(class="col btn btn-link" style="Padding-bottom: 40px;")
+            div(class="col btn btn-link" style="border: 5px solid #000000ff; display: inline-block; margin: 10px; background: rgb(56, 56, 56);")
               a(href=`/VerJuego/${game.IDJuego}`)
-                p #{game.Nombre}
-                br
                 img(src=`/Imagenes/${game.Imagen}`, alt=game.Nombre, style="width: 150px; height:150px; object-fit:cover;")
+                br
+                p #{game.Nombre}
         div(class="Container-fluid text-center justify-content-center")
          if friend == null && activeUser.IDUser != user.IDUser
           div(class="col btn btn-link" style="Padding-bottom: 40px;")

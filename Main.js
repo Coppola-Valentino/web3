@@ -73,7 +73,7 @@ const Updates = require('./Entidades/Updates');
 router.get('/', async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1;
-      const pageSize = parseInt(req.query.pageSize) || 6;
+      const pageSize = parseInt(req.query.pageSize) || 10;
       const offset = (page - 1) * pageSize;
 
     const { count, rows: juegos } = await Juego.findAndCountAll({
@@ -81,7 +81,16 @@ router.get('/', async (req, res) => {
       offset,
       limit: pageSize
     });
-    
+
+      const juegosCar = await Juego.findAll({
+        where: {
+          Estado: 'Activo',
+          Nota: { [Sequelize.Op.gte]: 7 }
+        },
+        limit: 5,
+        order: [['Nota', 'DESC']]
+      });
+
     if (req.headers.accept && req.headers.accept.includes('application/json')) {
       return res.json({
         juegos,
@@ -91,11 +100,11 @@ router.get('/', async (req, res) => {
       });
     }
 
-    res.render(`Home`, {juegos, total: count, page, pageSize });
+    res.render(`Home`, {juegos, juegosCar, total: count, page, pageSize });
     } catch (err) {
       console.error(err.message);
       res.redirect('/Error');
-    }
+    } 
 });
 
 router.get('/Home', async (req, res) => {
@@ -1258,8 +1267,15 @@ router.get('/Mensajeria',reqAuther, async (req, res) => {
     const pageSize = parseInt(req.query.pageSize) || 10;
     const offset = (page - 1) * pageSize;
 
+    const Frens = await Friend.findAll({ where: { 
+      [Sequelize.Op.or]: [
+        { UserID: req.session.IDUser },
+        { User2ID: req.session.IDUser }
+      ]
+    }});
+    const friendIDs = Frens.map(f => (f.UserID === req.session.IDUser ? f.User2ID : f.UserID));
     const { count, rows: usuarios } = await Usuario.findAndCountAll({
-      where: { IDUser: { [Sequelize.Op.ne]: req.session.IDUser } },
+      where: { IDUser: friendIDs },
       offset,
       limit: pageSize
     });
@@ -1302,7 +1318,7 @@ router.get('/Mensajes/:id', reqAuther, async (req, res) => {
       },
       offset,
       limit: pageSize,
-      order: [['IDMensaje', 'ASC']]
+      order: [['IDMensaje', 'DESC']]
     });
 
     const users = await Usuario.findAll();

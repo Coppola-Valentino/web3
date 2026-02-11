@@ -66,7 +66,7 @@ script.
         })
           .then(res => res.json())
           .then(data => {
-            this.mensajes = data.mensajes;
+            this.mensajes = data.mensajes.reverse();
             this.total = data.total;
             this.totalPages = Math.ceil(data.total / this.pageSize);
           });
@@ -90,7 +90,7 @@ script.
         })
         .then(res => res.json())
         .then(mensaje => {
-          this.mensajes.push(mensaje);
+          //this.mensajes.push(mensaje);
           this.Texto = '';
           this.Imagen = null;
           this.$refs.imagenInput.value = '';
