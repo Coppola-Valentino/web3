@@ -59,21 +59,22 @@ block content
              a.btn.btn-success(href=`/FreeToPlay/${juego.IDJuego}`) Añadir a Libreria
              br
           else
-           if licencia.Estado == 'Activa' && juego.Archivo
-            div(class="col btn btn-link" style="Padding-bottom: 40px;")  
-             a.btn.btn-primary(href=`/DescargarJuego/${juego.IDJuego}`) Descargar
-             br
+           if licencia.Estado == 'Activa' 
+            if juego.Archivo 
+             div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+              a.btn.btn-primary(href=`/DescargarJuego/${juego.IDJuego}`) Descargar
+              br
+             if resen == null
+              div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+               a.btn.btn-info(href=`/CrearResena/${juego.IDJuego}`) Escribir Reseña
+               br
+             else 
+              div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+               a.btn.btn-info(href=`/EditResena/${juego.IDJuego}/${resen.IDResena}`) Editar tu Reseña
+               br
             div(class="col btn btn-link" style="Padding-bottom: 40px;")  
              a.btn.btn-info(href=`/VerUpdates/${juego.IDJuego}`) Historial de Updates
              br
-            if resen == null
-             div(class="col btn btn-link" style="Padding-bottom: 40px;")  
-              a.btn.btn-info(href=`/CrearResena/${juego.IDJuego}`) Escribir Reseña
-              br
-            else 
-             div(class="col btn btn-link" style="Padding-bottom: 40px;")  
-              a.btn.btn-info(href=`/EditResena/${juego.IDJuego}/${resen.IDResena}`) Editar tu Reseña
-              br
            else if licencia.Estado == 'Baneada'
             div(class="col btn btn-link" style="Padding-bottom: 40px;")  
              p Licencia Revocada debido a: #{ban.Motivo}
@@ -109,13 +110,16 @@ block content
            a.btn.btn-info(href=`/EditJuego/${juego.IDJuego}`) Editar
            br  
           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
+           a.btn.btn-primary(href=`/DescargarJuego/${juego.IDJuego}`) Descargar
+           br
+          div(class="col btn btn-link" style="Padding-bottom: 40px;")  
            a.btn.btn-info(href=`/VerLicencias/${juego.IDJuego}`) Administrar Licencias
            br 
           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
            a.btn.btn-info(href=`/VerCategorias/${juego.IDJuego}`) Administrar Categorias
            br
           div(class="col btn btn-link" style="Padding-bottom: 40px;")  
-           a.btn.btn-info(href=`/CrearUpdate/${juego.IDJuego}`) Añadir Update
+           a.btn.btn-info(href=`/VerUpdates/${juego.IDJuego}`) Historial de Updates
            br
          if activeUser.Admin == true && juego.Estado == 'Activo'
           div(class="col btn btn-link" style="Padding-bottom: 40px;")  

@@ -5,7 +5,8 @@ block content
          h1 Update: #{update.Nombre}
          p Fecha: #{update.Fecha}
          p Contenido: #{update.Contenido}
-         div(class="Container-fluid text-center justify-content-center")      
+         if activeUser.Team == juego.DevID
+          div(class="Container-fluid text-center justify-content-center")      
            div(class="col btn btn-link" style="Padding-bottom: 40px;")
             a.btn.btn-success(href=`/EditUpdate/${update.IDUpdate}`) Editar
             br

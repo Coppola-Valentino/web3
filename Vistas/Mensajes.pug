@@ -9,7 +9,7 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
     br
     div(v-for="mensaje in mensajes" :key="mensaje.IDMensaje")
       b {{ mensaje.user.Nombre }}:
-      |  {{ mensaje.Texto }}
+      span(v-html="mensaje.Texto")
       span(v-if="mensaje.Imagen") 
         img(:src="'/Imagenes/' + mensaje.Imagen", style="max-width:100px;")
   br
@@ -19,8 +19,14 @@ div(style="max-width: 1500px; border: 5px solid #000000ff; margin: 0 auto; paddi
     br
     input(v-model="Texto" style="width: 1000px;" @keyup.enter="enviarMensaje" placeholder="Escribe un mensaje...")
     br
+    input(v-model="Texto" @keyup.enter="enviarMensaje" value="<>" hidden)
+    input(v-model="Texto" @keyup.enter="enviarMensaje" value="" hidden)
   div(class="Container-fluid text-center justify-content-center")
    button(@click="enviarMensaje") Enviar
+   if activeUser.Team != null
+    button(@click="enviarMensaje2") Invitar al equipo
+   if activeUser.Publish != null
+   button(@click="enviarMensaje3") Invitar al Publisher
   br
   div#pagination
     button(v-for="n in totalPages" :key="n" @click="goToPage(n)" :disabled="n===page") {{ n }}
@@ -49,6 +55,10 @@ script.
         IDUser: !{JSON.stringify(usuario.IDUser)},
         Nombre: !{JSON.stringify(usuario.Nombre)},
         Avatar: !{JSON.stringify(usuario.Avatar)}
+      },
+      activeUser: {
+        Team: !{JSON.stringify(activeUser.Team)},
+        Publish: !{JSON.stringify(activeUser.Publish)}
       }
     },
     created() {
@@ -91,6 +101,38 @@ script.
         .then(res => res.json())
         .then(mensaje => {
           //this.mensajes.push(mensaje);
+          this.Texto = '';
+          this.Imagen = null;
+          this.$refs.imagenInput.value = '';
+        });
+      },
+      enviarMensaje2() {
+        const formData = new FormData();
+        const teamId = this.activeUser.Team;
+        if (!teamId) return; 
+        formData.append('Texto', `¡Te invito a unirte a mi equipo! <a href="/JoinTeam/${teamId}" class="btn btn-success">Unirse al equipo</a>`);
+        fetch(`/Mensajes/${this.usuario.IDUser}`, {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(mensaje => {
+          this.Texto = '';
+          this.Imagen = null;
+          this.$refs.imagenInput.value = '';
+        });
+      },
+      enviarMensaje3() {
+        const formData = new FormData();
+        const publiID = this.activeUser.Publish; 
+        if (!publiID) return; 
+        formData.append('Texto', `¡Te invito a unirte a mi publisher! <a href="/JoinPublisher/${publiID}" class="btn btn-primary">Unirse al Publisher</a>`);
+        fetch(`/Mensajes/${this.usuario.IDUser}`, {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(mensaje => {
           this.Texto = '';
           this.Imagen = null;
           this.$refs.imagenInput.value = '';

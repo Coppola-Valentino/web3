@@ -1400,7 +1400,8 @@ router.get('/VerUpdates/:id',reqAuther, async (req, res) => {
 router.get('/VerUpdate/:id',reqAuther, async (req, res) => {
   try{
     const update = await Updates.findByPk(req.params.id);
-    res.render(`VerUpdate`, {update});
+    const juego = await Juego.findByPk(update.JuegoID);
+    res.render(`VerUpdate`, {update, juego});
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
@@ -1453,6 +1454,30 @@ router.post('/EditUpdate/:id', reqAuther, async (req, res) => {
   } catch (err) {
    console.error(err.message); 
    res.redirect('/Error');
+  }
+});
+
+router.get('/JoinTeam/:id', reqAuther, async (req, res) => {
+  try {
+    const team = await DevTeam.findByPk(req.params.id);
+    if (!team) return res.redirect('/Error');
+    await Usuario.update({ Team: req.params.id }, { where: { IDUser: req.session.IDUser }});
+    res.redirect('/Home');
+  } catch (err) {
+    console.error(err.message);
+    res.redirect('/Error');
+  }
+});
+
+router.get('/JoinPublisher/:id', reqAuther, async (req, res) => {
+  try {
+    const publisher = await Publisher.findByPk(req.params.id);
+    if (!publisher) return res.redirect('/Error');
+    await Usuario.update({ Publish: req.params.id }, { where: { IDUser: req.session.IDUser }});
+    res.redirect('/Home');
+  } catch (err) {
+    console.error(err.message);
+    res.redirect('/Error');
   }
 });
 
